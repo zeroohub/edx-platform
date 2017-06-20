@@ -31,7 +31,7 @@ from commerce.models import CommerceConfiguration
 from commerce.tests import factories
 from commerce.tests.mocks import mock_get_orders
 from course_modes.models import CourseMode
-from edxmako.shortcuts import render_to_response
+from openedx.core.djangoapps.user_api.accounts.tests.testutils import INVALID_EMAILS
 from openedx.core.djangoapps.oauth_dispatch.tests import factories as dot_factories
 from openedx.core.djangoapps.programs.tests.mixins import ProgramsApiConfigMixin
 from openedx.core.djangoapps.site_configuration.tests.mixins import SiteMixin
@@ -62,24 +62,6 @@ class StudentAccountUpdateTest(CacheIsolationTestCase, UrlResetMixin):
     NEW_EMAIL = u"walt@savewalterwhite.com"
 
     INVALID_ATTEMPTS = 100
-
-    INVALID_EMAILS = [
-        None,
-        u"",
-        u"a",
-        "no_domain",
-        "no+domain",
-        "@",
-        "@domain.com",
-        "test@no_extension",
-
-        # Long email -- subtract the length of the @domain
-        # except for one character (so we exceed the max length limit)
-        u"{user}@example.com".format(
-            user=(u'e' * (EMAIL_MAX_LENGTH - 11))
-        )
-    ]
-
     INVALID_KEY = u"123abc"
 
     URLCONF_MODULES = ['student_accounts.urls']
