@@ -59,7 +59,7 @@ class EnterpriseServiceMockMixin(object):
 
     def mock_enterprise_course_enrollment_get_api(self, **kwargs):
         result = {
-            'results': [{**kwargs}] if kwargs else []
+            'results': [kwargs] if kwargs else []
         }
         httpretty.register_uri(
             method=httpretty.GET,

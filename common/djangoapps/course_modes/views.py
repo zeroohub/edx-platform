@@ -241,7 +241,7 @@ class ChooseModeView(View):
         allowed_modes = CourseMode.modes_for_course_dict(course_key)
         if requested_mode not in allowed_modes:
             return HttpResponseBadRequest(_("Enrollment mode not supported"))
-        if requested_mode in {'audit', 'honor'}:
+        if requested_mode in CourseMode.AUDIT_MODES:
             # If the learner has arrived at this screen via the traditional enrollment workflow,
             # then they should already be enrolled in an audit mode for the course, assuming one has
             # been configured.  However, alternative enrollment workflows have been introduced into the
@@ -252,22 +252,28 @@ class ChooseModeView(View):
 
             if enterprise_learner_data:
                 enterprise_learner = enterprise_learner_data[0]
+                # If we have an enterprise learner, check to see if the current course is in the enterprise's catalog.
                 is_course_in_enterprise_catalog = enterprise_api.is_course_in_enterprise_catalog(
                     site=request.site,
                     course_id=course_id,
                     enterprise_catalog_id=enterprise_learner['enterprise_customer']['catalog']
                 )
-
+                # If the course is in the catalog, check for an existing Enterprise enrollment
                 if is_course_in_enterprise_catalog:
                     client = enterprise_api.EnterpriseApiClient()
                     if not client.get_enterprise_course_enrollment(enterprise_learner['id'], course_id):
+                        # If there's no existing Enterprise enrollment, create one.
                         client.post_enterprise_course_enrollment(user.username, course_id, None)
+                    # Check if consent is required, and generate a redirect URL to the
+                    # consent service if so; this function returns None if consent
+                    # is not required or has already been granted.
                     consent_url = enterprise_api.get_enterprise_consent_url(
                         request,
                         course_id,
                         user=user,
                         return_to_url=reverse('dashboard')
                     )
+                    # If we got a redirect URL for consent, go there now.
                     if consent_url:
                         return redirect(consent_url)
 

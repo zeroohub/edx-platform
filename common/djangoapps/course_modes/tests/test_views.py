@@ -442,7 +442,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         self.assertEqual(is_active, True)
 
     def test_unsupported_enrollment_mode_failure(self):
-self.mock_enterprise_learner_api()
+        self.mock_enterprise_learner_api()
         self.mock_enterprise_course_enrollment_get_api()
         # Create the supported course modes
         for mode in ('honor', 'verified'):

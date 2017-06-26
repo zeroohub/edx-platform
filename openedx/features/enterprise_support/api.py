@@ -60,6 +60,9 @@ class EnterpriseApiClient(object):
         )
 
     def get_enterprise_course_enrollment(self, ec_user_id, course_id):
+        """
+        Check for an EnterpriseCourseEnrollment linking a particular EnterpriseCustomerUser to a particular course.
+        """
         params = {
             'enterprise_customer_user': ec_user_id,
             'course_id': course_id,
@@ -73,7 +76,6 @@ class EnterpriseApiClient(object):
             ).format(
                 username=username,
                 course_id=course_id,
-                consent_granted=consent_granted,
             )
             LOGGER.exception(message)
             raise EnterpriseApiException(message)
@@ -82,7 +84,6 @@ class EnterpriseApiClient(object):
                 return response['results'][0]
             else:
                 return None
-
 
     def post_enterprise_course_enrollment(self, username, course_id, consent_granted):
         """
