@@ -63,7 +63,7 @@ class EnterpriseServiceMockMixin(object):
         }
         httpretty.register_uri(
             method=httpretty.GET,
-            url=self.get_enterprise_url('enterprise-course-enrollment'),
+            uri=self.get_enterprise_url('enterprise-course-enrollment'),
             body=json.dumps(result),
             content_type='application/json',
             status=200

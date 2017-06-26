@@ -233,6 +233,51 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         self.assertContains(response, 'Audit This Course')
 
     @httpretty.activate
+    @patch.object('course_modes.views.enterprise_api', 'get_enterprise_consent_url')
+    @ddt.data(
+        (True, True),
+        (True, False),
+        (False, True),
+        (False, False),
+    )
+    @ddt.unpack
+    def test_enterprise_course_enrollment_creation(self,
+                enterprise_enrollment_exists,
+                course_in_catalog,
+                get_consent_url_mock,
+        ):
+        for mode in ('audit', 'honor', 'verified'):
+            CourseModeFactory.create(mode_slug=mode, course_id=self.course.id)
+
+        catalog_integration = self.create_catalog_integration()
+        UserFactory(username=catalog_integration.service_username)
+
+        courses_in_catalog = [str(self.course_id)] if course_in_catalog else []
+        enterprise_enrollment = {'course_id': str(self.course.id)} if enterprise_enrollment_exists else {}
+
+        self.mock_course_discovery_api_for_catalog_contains(
+            catalog_id=1, course_run_ids=courses_in_catalog
+        )
+        self.mock_enterprise_course_enrollment_get_api(**enterprise_enrollment)
+        self.mock_enterprise_course_enrollment_post_api()
+        self.mock_enterprise_learner_api(enable_audit_enrollment=enable_audit_enrollment)
+
+        get_consent_url_mock.return_value = 'http://appropriate-consent-url.com/'
+
+        url = reverse('course_modes_choose', args=[unicode(self.course.id)])
+
+        response = self.client.post(url, self.POST_PARAMS_FOR_COURSE_MODE['audit'])
+
+        final_url = reverse('dashboard') if not course_in_catalog else 'http://appropriate-consent-url.com/'
+
+        self.assertRedirects(response, final_url)
+        if course_in_catalog:
+            if enterprise_enrollment_exists:
+                self.assertEquals(httpretty.last_request().method, 'GET')
+            else:
+                self.assertEquals(httpretty.last_request().method, 'POST')
+
+    @httpretty.activate
     @ddt.data(
         '',
         '1,,2',
