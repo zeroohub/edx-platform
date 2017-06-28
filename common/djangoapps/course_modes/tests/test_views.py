@@ -271,7 +271,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
 
         final_url = reverse('dashboard') if not course_in_catalog else 'http://appropriate-consent-url.com/'
 
-        self.assertRedirects(response, final_url)
+        self.assertRedirects(response, final_url, fetch_redirect_response=False)
         if course_in_catalog:
             if enterprise_enrollment_exists:
                 self.assertEquals(httpretty.last_request().method, 'GET')

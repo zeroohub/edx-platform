@@ -195,7 +195,7 @@ class TestEnterpriseApi(unittest.TestCase):
         self.assertEqual(actual_url, expected_url)
 
     @mock.patch('openedx.features.enterprise_support.api.consent_needed_for_course')
-    def test_get_enterprise_consent_url_next_provided_not_course_specific(self, needed_for_course_mock, reverse_mock):
+    def test_get_enterprise_consent_url_next_provided_not_course_specific(self, needed_for_course_mock):
         """
         Verify that get_enterprise_consent_url correctly builds URLs.
         """
