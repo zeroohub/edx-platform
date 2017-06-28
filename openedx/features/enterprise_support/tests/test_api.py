@@ -194,34 +194,6 @@ class TestEnterpriseApi(unittest.TestCase):
         actual_url = get_enterprise_consent_url(request_mock, course_id, return_to=return_to)
         self.assertEqual(actual_url, expected_url)
 
-    @mock.patch('openedx.features.enterprise_support.api.reverse')
-    @mock.patch('openedx.features.enterprise_support.api.consent_needed_for_course')
-    def test_get_enterprise_consent_url_next_provided(self, needed_for_course_mock, reverse_mock):
-        """
-        Verify that get_enterprise_consent_url correctly builds URLs.
-        """
-        needed_for_course_mock.return_value = True
-
-        request_mock = mock.MagicMock(
-            user=None,
-            build_absolute_uri=lambda x: 'http://localhost:8000' + x  # Don't do it like this in prod. Ever.
-        )
-
-        course_id = 'course-v1:edX+DemoX+Demo_Course'
-
-        expected_url = (
-            '/enterprise/grant_data_sharing_permissions?course_id=course-v1%3AedX%2BDemoX%2BDemo_'
-            'Course&failure_url=http%3A%2F%2Flocalhost%3A8000%2Fdashboard%3Fconsent_failed%3Dcou'
-            'rse-v1%253AedX%252BDemoX%252BDemo_Course&next=http%3A%2F%2Flocalhost%3A8000%2Fdashboard'
-        )
-
-        reverse_mock.return_value = 'http://localhost:8000/dashboard'
-
-        actual_url = get_enterprise_consent_url(request_mock, course_id, return_to='dashboard')
-        self.assertEqual(actual_url, expected_url)
-        reverse_mock.assert_called_once_with('dashboard', args=('course-v1:edX+DemoX+Demo_Course',))
-
-    @mock.patch('openedx.features.enterprise_support.api.reverse')
     @mock.patch('openedx.features.enterprise_support.api.consent_needed_for_course')
     def test_get_enterprise_consent_url_next_provided_not_course_specific(self, needed_for_course_mock, reverse_mock):
         """
@@ -242,11 +214,8 @@ class TestEnterpriseApi(unittest.TestCase):
             'rse-v1%253AedX%252BDemoX%252BDemo_Course&next=http%3A%2F%2Flocalhost%3A8000%2Fdashboard'
         )
 
-        reverse_mock.return_value = 'http://localhost:8000/dashboard'
-
         actual_url = get_enterprise_consent_url(request_mock, course_id, return_to='dashboard')
         self.assertEqual(actual_url, expected_url)
-        reverse_mock.assert_called_once_with('dashboard', args=tuple())
 
     def test_get_dashboard_consent_notification_no_param(self):
         """
