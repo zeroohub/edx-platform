@@ -294,7 +294,7 @@ def consent_needed_for_course(user, course_id):
     return consent_necessary_for_course(user, course_id)
 
 
-def get_enterprise_consent_url(request, course_id, user=None, return_to=None, return_to_url=None):
+def get_enterprise_consent_url(request, course_id, user=None, return_to=None, course_specific_return=True):
     """
     Build a URL to redirect the user to the Enterprise app to provide data sharing
     consent for a specific course ID.
@@ -312,10 +312,15 @@ def get_enterprise_consent_url(request, course_id, user=None, return_to=None, re
     if not consent_needed_for_course(user, course_id):
         return None
 
-    if return_to is None:
-        return_path = return_to_url or request.path
+    if course_specific_return:
+        reverse_args = (course_id,)
     else:
-        return_path = reverse(return_to, args=(course_id,))
+        reverse_args = tuple()
+
+    if return_to is None:
+        return_path = request.path
+    else:
+        return_path = reverse(return_to, args=reverse_args)
 
     url_params = {
         'course_id': course_id,

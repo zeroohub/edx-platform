@@ -25,6 +25,7 @@ from edxmako.shortcuts import render_to_response
 from lms.djangoapps.commerce.utils import EcommerceService
 from openedx.core.djangoapps.embargo import api as embargo_api
 from openedx.features.enterprise_support import api as enterprise_api
+from openedx.features.enterprise_support.api import get_enterprise_consent_url
 from student.models import CourseEnrollment
 from third_party_auth.decorators import tpa_hint_ends_existing_session
 from util import organizations_helpers as organization_api
@@ -267,11 +268,12 @@ class ChooseModeView(View):
                     # Check if consent is required, and generate a redirect URL to the
                     # consent service if so; this function returns None if consent
                     # is not required or has already been granted.
-                    consent_url = enterprise_api.get_enterprise_consent_url(
+                    consent_url = get_enterprise_consent_url(
                         request,
                         course_id,
                         user=user,
-                        return_to_url=reverse('dashboard')
+                        return_to='dashboard',
+                        course_specific_return=False,
                     )
                     # If we got a redirect URL for consent, go there now.
                     if consent_url:

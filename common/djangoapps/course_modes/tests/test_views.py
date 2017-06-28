@@ -233,7 +233,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         self.assertContains(response, 'Audit This Course')
 
     @httpretty.activate
-    @patch.object('course_modes.views.enterprise_api', 'get_enterprise_consent_url')
+    @patch('course_modes.views.get_enterprise_consent_url')
     @ddt.data(
         (True, True),
         (True, False),
@@ -241,11 +241,12 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         (False, False),
     )
     @ddt.unpack
-    def test_enterprise_course_enrollment_creation(self,
-                enterprise_enrollment_exists,
-                course_in_catalog,
-                get_consent_url_mock,
-        ):
+    def test_enterprise_course_enrollment_creation(
+            self,
+            enterprise_enrollment_exists,
+            course_in_catalog,
+            get_consent_url_mock,
+    ):
         for mode in ('audit', 'honor', 'verified'):
             CourseModeFactory.create(mode_slug=mode, course_id=self.course.id)
 
@@ -375,6 +376,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         'unsupported': {'unsupported_mode': True},
     }
 
+    @httpretty.activate
     @ddt.data(
         ('audit', 'dashboard'),
         ('honor', 'dashboard'),
@@ -406,6 +408,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
 
         self.assertRedirects(response, redirect_url)
 
+    @httpretty.activate
     def test_choose_mode_audit_enroll_on_post(self):
         self.mock_enterprise_learner_api()
         self.mock_enterprise_course_enrollment_get_api()
@@ -462,6 +465,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         expected_amount = decimal.Decimal(self.POST_PARAMS_FOR_COURSE_MODE['verified']['contribution'])
         self.assertEqual(actual_amount, expected_amount)
 
+    @httpretty.activate
     def test_successful_default_enrollment(self):
         self.mock_enterprise_learner_api()
         self.mock_enterprise_course_enrollment_get_api()
