@@ -214,7 +214,7 @@ class TestEnterpriseApi(unittest.TestCase):
             'rse-v1%253AedX%252BDemoX%252BDemo_Course&next=http%3A%2F%2Flocalhost%3A8000%2Fdashboard'
         )
 
-        actual_url = get_enterprise_consent_url(request_mock, course_id, return_to='dashboard')
+        actual_url = get_enterprise_consent_url(request_mock, course_id, return_to='dashboard', course_specific_return=False)
         self.assertEqual(actual_url, expected_url)
 
     def test_get_dashboard_consent_notification_no_param(self):
