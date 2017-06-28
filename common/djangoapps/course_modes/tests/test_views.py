@@ -253,7 +253,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         catalog_integration = self.create_catalog_integration()
         UserFactory(username=catalog_integration.service_username)
 
-        courses_in_catalog = [str(self.course_id)] if course_in_catalog else []
+        courses_in_catalog = [str(self.course.id)] if course_in_catalog else []
         enterprise_enrollment = {'course_id': str(self.course.id)} if enterprise_enrollment_exists else {}
 
         self.mock_course_discovery_api_for_catalog_contains(
@@ -261,7 +261,7 @@ class CourseModeViewTest(CatalogIntegrationMixin, UrlResetMixin, ModuleStoreTest
         )
         self.mock_enterprise_course_enrollment_get_api(**enterprise_enrollment)
         self.mock_enterprise_course_enrollment_post_api()
-        self.mock_enterprise_learner_api(enable_audit_enrollment=enable_audit_enrollment)
+        self.mock_enterprise_learner_api(enable_audit_enrollment=True)
 
         get_consent_url_mock.return_value = 'http://appropriate-consent-url.com/'
 
