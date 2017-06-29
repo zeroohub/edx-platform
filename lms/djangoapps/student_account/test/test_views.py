@@ -546,14 +546,14 @@ class StudentAccountLoginAndRegistrationTest(ThirdPartyAuthTestMixin, UrlResetMi
         """
         Test that enterprise cookies are deleted in login/registration views.
 
-        Cookies must be deleted on login/registration views so that default login/registration
-        branding is displayed to susequent requests from non enterprise customers.
+        Cookies must be deleted in login/registration views so that *default* login/registration branding
+        is displayed to subsequent requests from non-enterprise customers.
         """
         cookies = SimpleCookie()
         cookies[settings.ENTERPRISE_CUSTOMER_COOKIE_NAME] = 'test-enterprise-customer'
         response = self.client.get(reverse('signin_user'), HTTP_ACCEPT="text/html", cookies=cookies)
 
-        self.assertIn(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, response.cookies)   # pylint:disable=no-member
+        self.assertIn(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME, response.cookies)  # pylint:disable=no-member
         enterprise_cookie = response.cookies[settings.ENTERPRISE_CUSTOMER_COOKIE_NAME]  # pylint:disable=no-member
 
         self.assertEqual(enterprise_cookie['domain'], settings.BASE_COOKIE_DOMAIN)
