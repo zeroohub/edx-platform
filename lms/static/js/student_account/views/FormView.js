@@ -6,9 +6,9 @@
         'backbone',
         'common/js/utils/edx.utils.validate',
         'edx-ui-toolkit/js/utils/html-utils',
+        'edx-ui-toolkit/js/utils/string-utils',
         'text!templates/student_account/form_errors.underscore'
-    ],
-        function($, _, Backbone, EdxUtilsValidate, HtmlUtils, formErrorsTpl) {
+    ], function($, _, Backbone, EdxUtilsValidate, HtmlUtils, StringUtils, formErrorsTpl) {
             return Backbone.View.extend({
                 tagName: 'form',
 
@@ -177,7 +177,9 @@
                                 $el.removeClass('error');
                                 $label.removeClass('error');
                             } else {
-                                errors.push(test.message);
+                                if (!this.errorExists(test.id)) {
+                                    errors.push(test.message);
+                                }
                                 $el.addClass('error');
                                 $label.addClass('error');
                             }
@@ -190,7 +192,13 @@
                 },
 
                 saveError: function(error) {
-                    this.errors = ['<li>' + error.responseText + '</li>'];
+                    this.errors = [
+                        StringUtils.interpolate(
+                            '<li>{error}</li>', {
+                                error: error.responseText
+                            }
+                        )
+                    ];
                     this.renderErrors(this.defaultFormErrorsTitle, this.errors);
                     this.toggleDisableButton(false);
                 },
@@ -201,24 +209,49 @@
                 renderErrors: function(title, errorMessages) {
                     this.clearFormErrors();
 
-                    this.renderFormFeedback(this.formErrorsTpl, {
-                        jsHook: this.formErrorsJsHook,
-                        title: title,
-                        messagesHtml: HtmlUtils.HTML(errorMessages.join(''))
-                    });
+                    if (title || errorMessages.length) {
+                        this.renderFormFeedback(this.formErrorsTpl, {
+                            jsHook: this.formErrorsJsHook,
+                            title: title,
+                            messagesHtml: HtmlUtils.HTML(errorMessages.join(''))
+                        });
+                    }
                 },
 
                 renderFormFeedback: function(template, context) {
                     var tpl = HtmlUtils.template(template);
                     HtmlUtils.prepend(this.$formFeedback, tpl(context));
+                },
 
-                // Scroll to feedback container
-                    $('html,body').animate({
-                        scrollTop: this.$formFeedback.offset().top
-                    }, 'slow');
+                doOnErrorList: function(id, action) {
+                    var i;
+                    for (i = 0; i < this.errors.length; ++i) {
+                        if (this.errors[i].includes(id)) {
+                            action(i);
+                        }
+                    }
+                },
 
-                // Focus on the feedback container to ensure screen readers see the messages.
-                    this.$formFeedback.focus();
+                errorExists: function(id) {
+                    this.doOnErrorList(id, function(index) { // eslint-disable-line no-unused-vars
+                        return true;
+                    });
+                },
+
+                deleteError: function(id) {
+                    var self = this;
+                    this.doOnErrorList(id, function(index) {
+                        self.errors.splice(index, 1);
+                    });
+                },
+
+                addError: function(error, id) {
+                    this.errors.push(StringUtils.interpolate(
+                        '<li id="{errorId}">{error}</li>', {
+                            errorId: id,
+                            error: error
+                        }
+                    ));
                 },
 
             /* Allows extended views to add non-form attributes
@@ -244,6 +277,14 @@
                         this.clearFormErrors();
                     } else {
                         this.renderErrors(this.defaultFormErrorsTitle, this.errors);
+
+                    // Scroll to feedback container
+                        $('html,body').animate({
+                            scrollTop: this.$formFeedback.offset().top
+                        }, 'slow');
+
+                    // Focus on the feedback container to ensure screen readers see the messages.
+                        this.$formFeedback.focus();
                         this.toggleDisableButton(false);
                     }
 
@@ -285,6 +326,18 @@
 
                 validate: function($el) {
                     return EdxUtilsValidate.validate($el);
+                },
+
+                liveValidate: function($el, url, dataType, data, method, model) {
+                    $.ajax({
+                        url: url,
+                        dataType: dataType,
+                        data: data,
+                        method: method,
+                        success: function(response) {
+                            model.trigger('validation', $el, response);
+                        }
+                    });
                 }
             });
         });

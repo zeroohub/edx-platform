@@ -289,6 +289,10 @@
                 color: $red;
             }
 
+            &.success {
+                color: $success-color-hover;
+            }
+
             &[for="register-data_sharing_consent"],
             &[for="register-honor_code"],
             &[for="register-terms_of_service"] {
@@ -354,7 +358,11 @@
             }
 
             &.error {
-                border-color: $error-color;
+                border-color: $red;
+            }
+
+            &.success {
+                border-color: $success-color-hover;
             }
         }
 
@@ -383,8 +391,13 @@
             @extend %t-copy-sub1;
             color: $uxpl-gray-base;
         }
+
         .tip {
             display: block;
+        }
+
+        .error, .label-required {
+            color: $red;
         }
         /** FROM _accounts.scss - end **/
     }
