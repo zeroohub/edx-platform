@@ -16,7 +16,6 @@ setup(
         "openedx.core.djangoapps.credit",
         "openedx.core.djangoapps.user_api",
         "lms",
-        "cms",
     ],
     entry_points={
         "openedx.course_tab": [
