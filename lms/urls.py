@@ -19,6 +19,7 @@ from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.features.enterprise_support.api import enterprise_enabled
 
+
 # Uncomment the next two lines to enable the admin:
 if settings.DEBUG or settings.FEATURES.get('ENABLE_DJANGO_ADMIN_SITE'):
     admin.autodiscover()
@@ -145,6 +146,11 @@ js_info_dict = {
     # We need to explicitly include external Django apps that are not in LOCALE_PATHS.
     'packages': ('openassessment',),
 }
+
+urlpatterns += (
+    url(r'^openassessment/fileupload/', include('openassessment.fileupload.urls')),
+)
+
 
 # sysadmin dashboard, to see what courses are loaded, to delete & load courses
 if settings.FEATURES["ENABLE_SYSADMIN_DASHBOARD"]:
@@ -806,6 +812,13 @@ if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD'):
 
     )
 
+if configuration_helpers.get_value('ENABLE_BULK_ENROLLMENT_VIEW',
+                                   settings.FEATURES['ENABLE_BULK_ENROLLMENT_VIEW']):
+    urlpatterns += (
+        url(r'^api/bulk_enroll/v1/', include('bulk_enroll.urls')),
+    )
+
+
 # Shopping cart
 urlpatterns += (
     url(r'^shoppingcart/', include('shoppingcart.urls')),
@@ -985,7 +998,10 @@ if settings.DEBUG:
         settings.PROFILE_IMAGE_BACKEND['options']['base_url'],
         document_root=settings.PROFILE_IMAGE_BACKEND['options']['location']
     )
+    # TODO: re-enable this after removing the URL below
+    # urlpatterns += url(r'^template/(?P<template>.+)$', 'openedx.core.djangoapps.debug.views.show_reference_template')
 
+# TODO: DO NOT MERGE
 urlpatterns += url(r'^template/(?P<template>.+)$', 'openedx.core.djangoapps.debug.views.show_reference_template'),
 
 if 'debug_toolbar' in settings.INSTALLED_APPS:
