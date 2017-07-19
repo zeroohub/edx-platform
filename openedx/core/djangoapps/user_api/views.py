@@ -924,11 +924,22 @@ class RegistrationView(APIView):
                         running_pipeline.get('kwargs')
                     )
 
+                    # When the TPA Provider is configured to skip the registration form and we are in an
+                    # enterprise context, we need to hide all fields except for terms of service and
+                    # ensure that the user explicitly checks that field.
+                    hide_registration_fields_except_tos = (current_provider.skip_registration_form and
+                                                           enterprise_api.enterprise_customer_for_request(request))
+
                     for field_name in self.DEFAULT_FIELDS + self.EXTRA_FIELDS:
                         if field_name in field_overrides:
                             form_desc.override_field_properties(
                                 field_name, default=field_overrides[field_name]
                             )
+
+                            if field_name != 'terms_of_service' and hide_registration_fields_except_tos:
+                                form_desc.override_field_properties(
+                                    field_name, field_type="hidden"
+                                )
 
                     # Hide the password field
                     form_desc.override_field_properties(
