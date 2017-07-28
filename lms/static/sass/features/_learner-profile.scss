@@ -235,7 +235,7 @@
             }
 
             .u-field-value-readonly {
-                @extend %t-weight3;
+                font-weight: 500;
                 font-family: $sans-serif;
                 color: $darkest-base-font-color;
             }
