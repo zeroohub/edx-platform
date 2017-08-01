@@ -286,7 +286,7 @@ def enterprise_customer_for_request(request):
                 enterprise_customer_identity_provider__provider_id=sso_slug
             ).uuid
         except EnterpriseCustomer.DoesNotExist:
-            pass
+            ec_uuid = None
     else:
         ec_uuid = request.GET.get('enterprise_customer') or request.COOKIES.get(settings.ENTERPRISE_CUSTOMER_COOKIE_NAME)
 
