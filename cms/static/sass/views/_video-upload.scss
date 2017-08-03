@@ -13,9 +13,27 @@
     }
   }
 
+  .video-uploads-header, .transcript-settings-header {
+    font-size: 1.5em;
+    margin-bottom: .25em;
+    font-weight: 600
+  }
+
+  .transcript-settings-container {
+    width: 33%;
+    vertical-align: top;
+    display: inline-block;
+    margin-left: 10px;
+
+    .transcript-turnaround-wrapper, .transcript-fidelity-wrapper, .transcript-languages-wrapper {
+      display: none;
+    }
+  }
+
   .file-upload-form {
     @include clearfix();
-    width: 100%;
+    width: 65%;
+    display: inline-block;
 
     .file-drop-area {
       border: 2px dashed $gray-l3;
@@ -48,12 +66,6 @@
 
         .upload-text-link {
           color: $ui-link-color;
-        }
-
-        .video-uploads-header {
-          font-size: 1.5em;
-          margin-bottom: .25em;
-          font-weight: 600
         }
 
         .video-max-file-size-text {

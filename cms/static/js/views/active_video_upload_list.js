@@ -20,7 +20,10 @@ define([
             events: {
                 'click .file-drop-area': 'chooseFile',
                 'dragleave .file-drop-area': 'dragleave',
-                'drop .file-drop-area': 'dragleave'
+                'drop .file-drop-area': 'dragleave',
+                'change #transcript-provider': 'providerSelected',
+                'change #transcript-turnaround': 'preferenceSelected',
+                'change #transcript-fidelity': 'preferenceSelected',
             },
 
             uploadHeader: gettext('Upload Videos'),
@@ -40,6 +43,7 @@ define([
                 this.listenTo(this.collection, 'add', this.addUpload);
                 this.concurrentUploadLimit = options.concurrentUploadLimit || 0;
                 this.postUrl = options.postUrl;
+                this.transcriptionPlans = options.transcriptionPlans;
                 this.videoSupportedFileFormats = options.videoSupportedFileFormats;
                 this.videoUploadMaxFileSizeInGB = options.videoUploadMaxFileSizeInGB;
                 this.onFileUploadDone = options.onFileUploadDone;
@@ -59,6 +63,63 @@ define([
                         supportedVideoTypes: this.videoSupportedFileFormats.join(', ')
                     }
                 );
+            },
+
+            populatePreferenceOptions: function(provider) {
+                var $turnaround = $('#transcript-turnaround')[0],
+                    $fidelity = $('#transcript-fidelity')[0];
+
+                debugger;
+
+                $turnaround.options[0] = new Option('Select turnaround', 'turn-00');
+                // TODO: populate real values
+                $turnaround.options[1] = new Option('Standard 50% accuracy', 'standard50');
+                $turnaround.options[2] = new Option('Standard 80% accuracy', 'standard80');
+                $('.transcript-turnaround-wrapper').show();
+
+                if (provider === 'Cielo24') {
+                    $fidelity.options[0] = new Option('Select fidelity', 'fidelity-00');
+                    // TODO: populate real values
+                    $fidelity.options[1] = new Option('Premium 1 hour', 'premium');
+                    $fidelity.options[2] = new Option('Professional 24 hour', 'professional');
+                    $('.transcript-fidelity-wrapper').show();
+                } else {
+                    $('.transcript-fidelity-wrapper').hide();
+                }
+            },
+
+            enableManageLanguageContainer: function() {
+                var selectedProvider = $('#transcript-provider').val(),
+                    isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
+                    isFidelitySelected = $('#transcript-fidelity')[0].options.selectedIndex;
+
+                if ((isTurnaroundSelected && selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
+                    $('.transcript-languages-wrapper').show();
+                } else {
+                    $('.transcript-languages-wrapper').hide();
+                }
+            },
+
+            preferenceSelected: function() {
+                this.enableManageLanguageContainer();
+            },
+
+            providerSelected: function(event) {
+                var provider = event.target.value;
+                this.populatePreferenceOptions(provider);
+                this.enableManageLanguageContainer();
+            },
+
+            getProviders: function() {
+                return _.keys(this.transcriptionPlans);
+            },
+
+            getTurnarounds: function() {
+                return _.keys(this.transcriptionPlans);
+            },
+
+            getFidelity: function() {
+                return _.keys(this.transcriptionPlans);
             },
 
             render: function() {

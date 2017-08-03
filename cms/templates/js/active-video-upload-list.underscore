@@ -1,3 +1,4 @@
+<div>
 <form class="file-upload-form">
     <div class="file-drop-area">
         <span class="icon fa fa-cloud-upload" aria-hidden="true"></span>
@@ -10,6 +11,36 @@
     </div>
     <input type="file" class="sr js-file-input" name="file" multiple>
 </form>
+<div class='transcript-settings-container'>
+    <div class="transcript-settings-header"><%- gettext('Global Video Settings') %></div>
+    <div class='transcript-provider-wrapper'>
+        <label>
+            <%- gettext('Transcript provider: ') %>
+            <select id='transcript-provider'>
+                <option value="-1" selected="selected"><%- gettext('Select provider') %></option>
+                <% for (var i=0; i < providers.length; i++) { %>
+                    <option id="<%- providers[i] %>-option" value="<%- providers[i] %>"><%- providers[i] %></option>
+                <% } %>
+            </select>
+        </lable>
+    </div>
+    <div class='transcript-turnaround-wrapper'>
+        <label>
+            <%- gettext('Transcript turnaround: ') %>
+            <select id='transcript-turnaround'></select>
+        <label>
+    </div>
+    <div class='transcript-fidelity-wrapper'>
+        <label>
+            <%- gettext('Transcript fidelity: ') %>
+            <select id='transcript-fidelity'></select>
+        <label>
+    </div>
+    <div class='transcript-languages-wrapper'>
+        <a href='#' id='transcript-languages'>Manage lanaguages</a>
+    </div>
+</div>
+</div>
 <section class="active-video-upload-container">
     <h3 class="sr"><%= gettext("Active Uploads") %></h3>
     <ul class="active-video-upload-list"></ul>

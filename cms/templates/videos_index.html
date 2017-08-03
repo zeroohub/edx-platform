@@ -38,7 +38,8 @@
             $contentWrapper.data("previous-uploads"),
             ${video_supported_file_formats | n, dump_js_escaped_json},
             ${video_upload_max_file_size | n, dump_js_escaped_json},
-            ${video_image_settings | n, dump_js_escaped_json}
+            ${video_image_settings | n, dump_js_escaped_json},
+            ${transcription_plans | n, dump_js_escaped_json}
         );
     });
 </%block>
