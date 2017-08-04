@@ -25,8 +25,16 @@
     display: inline-block;
     margin-left: 10px;
 
+    .transcript-settings-wrapper {
+      margin-top: 20px;
+    }
+
     .transcript-turnaround-wrapper, .transcript-fidelity-wrapper, .transcript-languages-wrapper {
       display: none;
+    }
+
+    .transcript-languages-wrapper {
+      margin-top: 10px;
     }
   }
 

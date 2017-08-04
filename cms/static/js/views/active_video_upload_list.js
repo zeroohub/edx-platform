@@ -65,23 +65,40 @@ define([
                 );
             },
 
-            populatePreferenceOptions: function(provider) {
-                var $turnaround = $('#transcript-turnaround')[0],
-                    $fidelity = $('#transcript-fidelity')[0];
+            getFidelityPlan: function() {
+                if (this.provider == 'Cielo24') {
+                    return this.transcriptionPlans[this.provider].fidelity;
+                }
+            },
 
-                debugger;
+            getTurnaroundPlan: function() {
+                return this.transcriptionPlans[this.provider].turnaround;
+            },
 
-                $turnaround.options[0] = new Option('Select turnaround', 'turn-00');
-                // TODO: populate real values
-                $turnaround.options[1] = new Option('Standard 50% accuracy', 'standard50');
-                $turnaround.options[2] = new Option('Standard 80% accuracy', 'standard80');
+            getPlanLanguages: function() {
+                return {
+                    'en': 'English',
+                    'ur': 'Urdu'
+                }
+            },
+
+            populatePreferenceOptions: function() {
+                var turnaroundPlan = this.getTurnaroundPlan(),
+                    fidelityPlan = this.getFidelityPlan(),
+                    $turnaround = $('#transcript-turnaround'),
+                    $fidelity = $('#transcript-fidelity');
+
+                $turnaround.empty().append(new Option('Select turnaround', 'turn-00'));
+                _.each(turnaroundPlan, function(value, key){
+                    $turnaround.append(new Option(value, key));
+                });
                 $('.transcript-turnaround-wrapper').show();
 
-                if (provider === 'Cielo24') {
-                    $fidelity.options[0] = new Option('Select fidelity', 'fidelity-00');
-                    // TODO: populate real values
-                    $fidelity.options[1] = new Option('Premium 1 hour', 'premium');
-                    $fidelity.options[2] = new Option('Professional 24 hour', 'professional');
+                if (fidelityPlan) {
+                    $fidelity.empty().append(new Option('Select fidelity', 'fidelity-00'));
+                    _.each(fidelityPlan, function(fidelityObject, key){
+                        $fidelity.append(new Option(fidelityObject.display_name, key));
+                    });
                     $('.transcript-fidelity-wrapper').show();
                 } else {
                     $('.transcript-fidelity-wrapper').hide();
@@ -89,11 +106,10 @@ define([
             },
 
             enableManageLanguageContainer: function() {
-                var selectedProvider = $('#transcript-provider').val(),
-                    isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
+                var isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
                     isFidelitySelected = $('#transcript-fidelity')[0].options.selectedIndex;
 
-                if ((isTurnaroundSelected && selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
+                if ((isTurnaroundSelected && this.provider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
                     $('.transcript-languages-wrapper').show();
                 } else {
                     $('.transcript-languages-wrapper').hide();
@@ -105,8 +121,8 @@ define([
             },
 
             providerSelected: function(event) {
-                var provider = event.target.value;
-                this.populatePreferenceOptions(provider);
+                this.provider = event.target.value;
+                this.populatePreferenceOptions();
                 this.enableManageLanguageContainer();
             },
 
