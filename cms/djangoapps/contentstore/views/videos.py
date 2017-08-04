@@ -306,7 +306,7 @@ def validate_transcript_preferences(
                 }
             else:
                 error = 'invalid cielo24 fidelity'
-        else:
+        elif provider == TranscriptProvider.THREE_PLAY_MEDIA:
             # validate transcription turnaround
             supported_turnarounds = transcription_plans[provider]['turnaround']
             if three_play_turnaround not in supported_turnarounds.keys():
