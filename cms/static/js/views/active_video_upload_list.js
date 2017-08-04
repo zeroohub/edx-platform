@@ -22,8 +22,9 @@ define([
                 'dragleave .file-drop-area': 'dragleave',
                 'drop .file-drop-area': 'dragleave',
                 'change #transcript-provider': 'providerSelected',
-                'change #transcript-turnaround': 'preferenceSelected',
-                'change #transcript-fidelity': 'preferenceSelected',
+                'change #transcript-turnaround': 'turnaroundSelected',
+                'change #transcript-fidelity': 'fidelitySelected',
+                'click #transcript-languages': 'showLanguagesModal'
             },
 
             uploadHeader: gettext('Upload Videos'),
@@ -63,22 +64,56 @@ define([
                         supportedVideoTypes: this.videoSupportedFileFormats.join(', ')
                     }
                 );
+                this.selectedProvider;
+                this.selectedTurnaroundPlan;
+                this.selectedFidelityPlan;
+                this.availableLanguages;
             },
 
             getFidelityPlan: function() {
-                if (this.provider == 'Cielo24') {
-                    return this.transcriptionPlans[this.provider].fidelity;
+                if (this.selectedProvider == 'Cielo24') {
+                    return this.transcriptionPlans[this.selectedProvider].fidelity;
                 }
             },
 
             getTurnaroundPlan: function() {
-                return this.transcriptionPlans[this.provider].turnaround;
+                return this.transcriptionPlans[this.selectedProvider].turnaround;
             },
 
             getPlanLanguages: function() {
-                return {
-                    'en': 'English',
-                    'ur': 'Urdu'
+                var selectedPlan = this.transcriptionPlans[this.selectedProvider];
+                if (this.selectedProvider == 'Cielo24') {
+                    return selectedPlan.fidelity[this.selectedFidelityPlan].languages;
+                }
+                return selectedPlan.languages;
+            },
+
+            fidelitySelected: function(event) {
+                this.selectedFidelityPlan = event.target.value;
+                this.enableManageLanguageContainer();
+            },
+
+            turnaroundSelected: function(event) {
+                this.selectedTurnaroundPlan = event.target.value;
+                this.enableManageLanguageContainer();
+            },
+
+            providerSelected: function(event) {
+                this.selectedProvider = event.target.value;
+                this.populatePreferenceOptions();
+                this.enableManageLanguageContainer();
+            },
+
+            enableManageLanguageContainer: function() {
+                var isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
+                    isFidelitySelected = $('#transcript-fidelity')[0].options.selectedIndex;
+
+                if ((isTurnaroundSelected && this.selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
+                    this.availableLanguages = this.getPlanLanguages();
+                    $('.transcript-languages-wrapper').show();
+                } else {
+                    this.availableLanguages = {};
+                    $('.transcript-languages-wrapper').hide();
                 }
             },
 
@@ -105,37 +140,12 @@ define([
                 }
             },
 
-            enableManageLanguageContainer: function() {
-                var isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
-                    isFidelitySelected = $('#transcript-fidelity')[0].options.selectedIndex;
-
-                if ((isTurnaroundSelected && this.provider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
-                    $('.transcript-languages-wrapper').show();
-                } else {
-                    $('.transcript-languages-wrapper').hide();
-                }
-            },
-
-            preferenceSelected: function() {
-                this.enableManageLanguageContainer();
-            },
-
-            providerSelected: function(event) {
-                this.provider = event.target.value;
-                this.populatePreferenceOptions();
-                this.enableManageLanguageContainer();
-            },
-
-            getProviders: function() {
-                return _.keys(this.transcriptionPlans);
-            },
-
-            getTurnarounds: function() {
-                return _.keys(this.transcriptionPlans);
-            },
-
-            getFidelity: function() {
-                return _.keys(this.transcriptionPlans);
+            showLanguagesModal: function() {
+                // TODO: Launch a languages modal.
+                // This is probably going to be a new view which will let user add and and remove langauges.
+                // When clicked Done, will send back data to this view to send to backend to store transcript settings.
+                // This will take available languages and previous saved language data and return new data
+                // to save/modify.
             },
 
             render: function() {
