@@ -32,9 +32,10 @@
                 <select id='transcript-fidelity'></select>
             <label>
         </div>
-        <div class='transcript-languages-wrapper'>
-            <a href='#' id='transcript-languages'>Manage transcript languages</a>
+        <div class='transcript-languages-action-wrapper'>
+            <a href='#' id='transcript-languages-action'>Manage transcript languages</a>
         </div>
+        <div class='transcript-languages-wrapper'></div>
     </div>
 </div>
 </div>

@@ -5,12 +5,13 @@ define([
     'js/models/active_video_upload',
     'js/views/baseview',
     'js/views/active_video_upload',
+    'js/views/video_transcript_languages',
     'edx-ui-toolkit/js/utils/html-utils',
     'edx-ui-toolkit/js/utils/string-utils',
     'text!templates/active-video-upload-list.underscore',
     'jquery.fileupload'
 ],
-    function($, _, Backbone, ActiveVideoUpload, BaseView, ActiveVideoUploadView,
+    function($, _, Backbone, ActiveVideoUpload, BaseView, ActiveVideoUploadView, VideoTranscriptLanguagesView,
              HtmlUtils, StringUtils, activeVideoUploadListTemplate) {
         'use strict';
         var ActiveVideoUploadListView,
@@ -24,7 +25,7 @@ define([
                 'change #transcript-provider': 'providerSelected',
                 'change #transcript-turnaround': 'turnaroundSelected',
                 'change #transcript-fidelity': 'fidelitySelected',
-                'click #transcript-languages': 'showLanguagesModal'
+                'click #transcript-languages-action': 'showTranscriptLanguages'
             },
 
             uploadHeader: gettext('Upload Videos'),
@@ -44,7 +45,7 @@ define([
                 this.listenTo(this.collection, 'add', this.addUpload);
                 this.concurrentUploadLimit = options.concurrentUploadLimit || 0;
                 this.postUrl = options.postUrl;
-                this.courseTranscriptionData = options.courseTranscriptionData;
+                this.activeTranscriptionPlan = options.activeTranscriptionPlan;
                 this.availableTranscriptionPlans = options.availableTranscriptionPlans;
                 this.videoSupportedFileFormats = options.videoSupportedFileFormats;
                 this.videoUploadMaxFileSizeInGB = options.videoUploadMaxFileSizeInGB;
@@ -69,11 +70,11 @@ define([
                 this.selectedTurnaroundPlan = '';
                 this.selectedFidelityPlan = '';
                 this.availableLanguages = [];
-                this.selectedLanguages = [];
+                this.activeLanguages = [];
                 this.setTranscriptData();
 
                 // method to send ajax request to save transcript settings
-                this.listenTo(Backbone, 'videotransripts:saveTranscriptPreferences', this.saveTranscriptPreferences);
+                this.listenTo(Backbone, 'videotranscripts:saveTranscriptPreferences', this.saveTranscriptPreferences);
             },
 
             getProviderPlan: function() {
@@ -119,19 +120,19 @@ define([
 
                 if ((isTurnaroundSelected && this.selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
                     this.availableLanguages = this.getPlanLanguages();
-                    this.$el.find('.transcript-languages-wrapper').show();
+                    this.$el.find('.transcript-languages-action-wrapper').show();
                 } else {
                     this.availableLanguages = {};
-                    this.$el.find('.transcript-languages-wrapper').hide();
+                    this.$el.find('.transcript-languages-action-wrapper').hide();
                 }
             },
 
             setTranscriptData: function(){
-                if (this.courseTranscriptionData) {
-                    this.selectedProvider = this.courseTranscriptionData['provider'];
-                    this.selectedFidelityPlan = this.courseTranscriptionData['cielo24_fidelity'];
-                    this.selectedTurnaroundPlan = this.courseTranscriptionData['cielo24_turnaround'] ? this.courseTranscriptionData['cielo24_turnaround']: this.courseTranscriptionData['three_play_turnaround'];
-                    this.selectedLanguages = this.courseTranscriptionData['preferred_languages'];
+                if (this.activeTranscriptionPlan) {
+                    this.selectedProvider = this.activeTranscriptionPlan['provider'];
+                    this.selectedFidelityPlan = this.activeTranscriptionPlan['cielo24_fidelity'];
+                    this.selectedTurnaroundPlan = this.activeTranscriptionPlan['cielo24_turnaround'] ? this.activeTranscriptionPlan['cielo24_turnaround']: this.activeTranscriptionPlan['three_play_turnaround'];
+                    this.activeLanguages = this.activeTranscriptionPlan['preferred_languages'];
                 }
             },
 
@@ -145,7 +146,7 @@ define([
                     $fidelity = self.$el.find('#transcript-fidelity');
 
                 // Provider dropdown
-                $provider.empty().append(new Option('Select provider', 'turn-00'));
+                $provider.empty().append(new Option('Select provider', ''));
                 _.each(providerPlan, function(providerObject, key){
                     var option = new Option(providerObject.display_name, key);
                     if (self.selectedProvider === key) {
@@ -155,7 +156,7 @@ define([
                 });
 
                 // Turnaround dropdown
-                $turnaround.empty().append(new Option('Select turnaround', 'turn-00'));
+                $turnaround.empty().append(new Option('Select turnaround', ''));
                 _.each(turnaroundPlan, function(value, key){
                     var option = new Option(value, key);
                     if (self.selectedTurnaroundPlan === key) {
@@ -167,7 +168,7 @@ define([
 
                 // Fidelity dropdown
                 if (fidelityPlan) {
-                    $fidelity.empty().append(new Option('Select fidelity', 'fidelity-00'));
+                    $fidelity.empty().append(new Option('Select fidelity', ''));
                     _.each(fidelityPlan, function(fidelityObject, key){
                         var option = new Option(fidelityObject.display_name, key);
                         if (self.selectedFidelityPlan === key) {
@@ -183,17 +184,18 @@ define([
                 self.manageLanguageContainer();
             },
 
-            showLanguagesModal: function() {
-                // TODO: Launch a languages modal.
-                // This is probably going to be a new view which will let user add and and remove langauges.
-                // When clicked Done, will send back data to this view to send to backend to store transcript settings.
-                // This will take available languages and previous saved language data and return new data
-                // to save/modify.
+            showTranscriptLanguages: function() {
+                this.VideoTranscriptLanguagesView = new VideoTranscriptLanguagesView({
+                    availableLanguages: this.availableLanguages,
+                    activeLanguages: this.activeLanguages
+                });
+                Backbone.trigger('videotranscripts:showTranscriptLanguages');
             },
 
-            saveTranscriptPreferences: function() {
+            saveTranscriptPreferences: function(selectedLanguages) {
+                debugger;
                 // TODO: send ajax to video handler.
-            }
+            },
 
             render: function() {
                 var preventDefault;

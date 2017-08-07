@@ -15,7 +15,7 @@ define([
         videoSupportedFileFormats,
         videoUploadMaxFileSizeInGB,
         videoImageSettings,
-        courseTranscriptionData,
+        activeTranscriptionPlan,
         availableTranscriptionPlans
     ) {
         var activeView = new ActiveVideoUploadListView({
@@ -25,7 +25,7 @@ define([
                 videoSupportedFileFormats: videoSupportedFileFormats,
                 videoUploadMaxFileSizeInGB: videoUploadMaxFileSizeInGB,
                 videoImageSettings: videoImageSettings,
-                courseTranscriptionData: courseTranscriptionData,
+                activeTranscriptionPlan: activeTranscriptionPlan,
                 availableTranscriptionPlans: availableTranscriptionPlans,
                 onFileUploadDone: function(activeVideos) {
                     $.ajax({

@@ -1,0 +1,17 @@
+<div class='transcript-languages-header'>
+    <span>Manage transcript languages</span>
+</div>
+
+<div class='transcript-languages-container'>
+    <div class='languages-menu-container'></div>
+    <a href='#' class='action-add-language'>Add a language</a>
+</div>
+
+<div class='transcript-languages-footer'>
+    <a href="#" class="action-save-transcript-preferences">Save</a>
+    <a href="#" class="action-cancel">Cancel</a>
+</div>
+
+
+
+
