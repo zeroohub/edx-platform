@@ -44,7 +44,8 @@ define([
                 this.listenTo(this.collection, 'add', this.addUpload);
                 this.concurrentUploadLimit = options.concurrentUploadLimit || 0;
                 this.postUrl = options.postUrl;
-                this.transcriptionPlans = options.transcriptionPlans;
+                this.courseTranscriptionData = options.courseTranscriptionData;
+                this.availableTranscriptionPlans = options.availableTranscriptionPlans;
                 this.videoSupportedFileFormats = options.videoSupportedFileFormats;
                 this.videoUploadMaxFileSizeInGB = options.videoUploadMaxFileSizeInGB;
                 this.onFileUploadDone = options.onFileUploadDone;
@@ -64,24 +65,33 @@ define([
                         supportedVideoTypes: this.videoSupportedFileFormats.join(', ')
                     }
                 );
-                this.selectedProvider;
-                this.selectedTurnaroundPlan;
-                this.selectedFidelityPlan;
-                this.availableLanguages;
+                this.selectedProvider = '';
+                this.selectedTurnaroundPlan = '';
+                this.selectedFidelityPlan = '';
+                this.availableLanguages = [];
+                this.selectedLanguages = [];
+                this.setTranscriptData();
+
+                // method to send ajax request to save transcript settings
+                this.listenTo(Backbone, 'videotransripts:saveTranscriptPreferences', this.saveTranscriptPreferences);
+            },
+
+            getProviderPlan: function() {
+                return this.availableTranscriptionPlans;
+            },
+
+            getTurnaroundPlan: function() {
+                return this.availableTranscriptionPlans[this.selectedProvider].turnaround;
             },
 
             getFidelityPlan: function() {
                 if (this.selectedProvider == 'Cielo24') {
-                    return this.transcriptionPlans[this.selectedProvider].fidelity;
+                    return this.availableTranscriptionPlans[this.selectedProvider].fidelity;
                 }
             },
 
-            getTurnaroundPlan: function() {
-                return this.transcriptionPlans[this.selectedProvider].turnaround;
-            },
-
             getPlanLanguages: function() {
-                var selectedPlan = this.transcriptionPlans[this.selectedProvider];
+                var selectedPlan = this.availableTranscriptionPlans[this.selectedProvider];
                 if (this.selectedProvider == 'Cielo24') {
                     return selectedPlan.fidelity[this.selectedFidelityPlan].languages;
                 }
@@ -90,54 +100,87 @@ define([
 
             fidelitySelected: function(event) {
                 this.selectedFidelityPlan = event.target.value;
-                this.enableManageLanguageContainer();
+                this.manageLanguageContainer();
             },
 
             turnaroundSelected: function(event) {
                 this.selectedTurnaroundPlan = event.target.value;
-                this.enableManageLanguageContainer();
+                this.manageLanguageContainer();
             },
 
             providerSelected: function(event) {
                 this.selectedProvider = event.target.value;
                 this.populatePreferenceOptions();
-                this.enableManageLanguageContainer();
             },
 
-            enableManageLanguageContainer: function() {
-                var isTurnaroundSelected = $('#transcript-turnaround')[0].options.selectedIndex,
-                    isFidelitySelected = $('#transcript-fidelity')[0].options.selectedIndex;
+            manageLanguageContainer: function() {
+                var isTurnaroundSelected = this.$el.find('#transcript-turnaround')[0].options.selectedIndex,
+                    isFidelitySelected = this.$el.find('#transcript-fidelity')[0].options.selectedIndex;
 
                 if ((isTurnaroundSelected && this.selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
                     this.availableLanguages = this.getPlanLanguages();
-                    $('.transcript-languages-wrapper').show();
+                    this.$el.find('.transcript-languages-wrapper').show();
                 } else {
                     this.availableLanguages = {};
-                    $('.transcript-languages-wrapper').hide();
+                    this.$el.find('.transcript-languages-wrapper').hide();
                 }
             },
 
-            populatePreferenceOptions: function() {
-                var turnaroundPlan = this.getTurnaroundPlan(),
-                    fidelityPlan = this.getFidelityPlan(),
-                    $turnaround = $('#transcript-turnaround'),
-                    $fidelity = $('#transcript-fidelity');
+            setTranscriptData: function(){
+                if (this.courseTranscriptionData) {
+                    this.selectedProvider = this.courseTranscriptionData['provider'];
+                    this.selectedFidelityPlan = this.courseTranscriptionData['cielo24_fidelity'];
+                    this.selectedTurnaroundPlan = this.courseTranscriptionData['cielo24_turnaround'] ? this.courseTranscriptionData['cielo24_turnaround']: this.courseTranscriptionData['three_play_turnaround'];
+                    this.selectedLanguages = this.courseTranscriptionData['preferred_languages'];
+                }
+            },
 
+            populatePreferenceOptions: function(isFirstRender) {
+                var self = this,
+                    providerPlan = self.getProviderPlan(),
+                    turnaroundPlan = self.getTurnaroundPlan(),
+                    fidelityPlan = self.getFidelityPlan(),
+                    $provider = self.$el.find('#transcript-provider'),
+                    $turnaround = self.$el.find('#transcript-turnaround'),
+                    $fidelity = self.$el.find('#transcript-fidelity');
+
+                // Provider dropdown
+                $provider.empty().append(new Option('Select provider', 'turn-00'));
+                _.each(providerPlan, function(providerObject, key){
+                    var option = new Option(providerObject.display_name, key);
+                    if (self.selectedProvider === key) {
+                        option.selected = true;
+                    }
+                    $provider.append(option);
+                });
+
+                // Turnaround dropdown
                 $turnaround.empty().append(new Option('Select turnaround', 'turn-00'));
                 _.each(turnaroundPlan, function(value, key){
-                    $turnaround.append(new Option(value, key));
+                    var option = new Option(value, key);
+                    if (self.selectedTurnaroundPlan === key) {
+                        option.selected = true;
+                    }
+                    $turnaround.append(option);
                 });
-                $('.transcript-turnaround-wrapper').show();
+                self.$el.find('.transcript-turnaround-wrapper').show();
 
+                // Fidelity dropdown
                 if (fidelityPlan) {
                     $fidelity.empty().append(new Option('Select fidelity', 'fidelity-00'));
                     _.each(fidelityPlan, function(fidelityObject, key){
-                        $fidelity.append(new Option(fidelityObject.display_name, key));
+                        var option = new Option(fidelityObject.display_name, key);
+                        if (self.selectedFidelityPlan === key) {
+                            option.selected = true;
+                        }
+                        $fidelity.append(option);
                     });
-                    $('.transcript-fidelity-wrapper').show();
+                    self.$el.find('.transcript-fidelity-wrapper').show();
                 } else {
-                    $('.transcript-fidelity-wrapper').hide();
+                    self.$el.find('.transcript-fidelity-wrapper').hide();
                 }
+
+                self.manageLanguageContainer();
             },
 
             showLanguagesModal: function() {
@@ -147,6 +190,10 @@ define([
                 // This will take available languages and previous saved language data and return new data
                 // to save/modify.
             },
+
+            saveTranscriptPreferences: function() {
+                // TODO: send ajax to video handler.
+            }
 
             render: function() {
                 var preventDefault;
@@ -185,6 +232,9 @@ define([
                 $(window).on('drop', preventDefault);
                 $(window).on('beforeunload', this.onBeforeUnload.bind(this));
                 $(window).on('unload', this.onUnload.bind(this));
+
+                // populate video transcript
+                this.populatePreferenceOptions(true);
 
                 return this;
             },
