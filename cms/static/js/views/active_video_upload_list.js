@@ -75,6 +75,7 @@ define([
 
                 // method to send ajax request to save transcript settings
                 this.listenTo(Backbone, 'videotranscripts:saveTranscriptPreferences', this.saveTranscriptPreferences);
+                this.listenTo(Backbone, 'videotranscripts:destroyTranscriptLanguages', this.destroyTranscriptLanguages);
             },
 
             getProviderPlan: function() {
@@ -185,14 +186,31 @@ define([
             },
 
             showTranscriptLanguages: function() {
-                this.VideoTranscriptLanguagesView = new VideoTranscriptLanguagesView({
-                    availableLanguages: this.availableLanguages,
-                    activeLanguages: this.activeLanguages
-                });
+                if (!this.VideoTranscriptLanguagesView) {
+                    this.VideoTranscriptLanguagesView = new VideoTranscriptLanguagesView({
+                        availableLanguages: this.availableLanguages,
+                        activeLanguages: this.activeLanguages
+                    });
+                } else {
+                    this.VideoTranscriptLanguagesView.availableLanguages = this.availableLanguages;
+                    this.VideoTranscriptLanguagesView.activeLanguages = this.activeLanguages;
+                }
                 Backbone.trigger('videotranscripts:showTranscriptLanguages');
             },
 
+            destroyTranscriptLanguages: function() {
+                this.VideoTranscriptLanguagesView = undefined;
+            },
+
             saveTranscriptPreferences: function(selectedLanguages) {
+                this.activeLanguages = selectedLanguages;
+                var data = {
+                    provider: this.selectedProvider,
+                    cielo24_fidelity: this.selectedFidelityPlan,
+                    cielo24_turnaround: this.selectedProvider === 'Cielo24' ? this.selectedTurnaroundPlan : '',
+                    three_play_turnaround: this.selectedProvider === '3PlayMedia' ? this.selectedTurnaroundPlan : '',
+                    preferred_languages: this.activeLanguages
+                }
                 debugger;
                 // TODO: send ajax to video handler.
             },

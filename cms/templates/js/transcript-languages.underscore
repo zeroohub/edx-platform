@@ -9,9 +9,5 @@
 
 <div class='transcript-languages-footer'>
     <a href="#" class="action-save-transcript-preferences">Save</a>
-    <a href="#" class="action-cancel">Cancel</a>
+    <a href="#" class="action-cancel-transcript-preferences">Cancel</a>
 </div>
-
-
-
-

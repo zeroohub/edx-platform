@@ -14,11 +14,12 @@ function($, Backbone, _, gettext, HtmlUtils, StringUtils, TranscriptLanguagesVie
         el: 'div.transcript-languages-wrapper',
 
         events: {
-            'click .action-save-transcript-preferences': 'submitSelectedLanguages',
             'click .action-add-language': 'addLanguageMenu',
-            'click .action-select-language': 'languageSelected',
+            'click .action-select-language': 'languageAdded',
             'click .action-cancel-language': 'languageCancelled',
-            'click .action-remove-language': 'languageRemoved'
+            'click .action-remove-language': 'languageRemoved',
+            'click .action-save-transcript-preferences': 'submitSelectedLanguages',
+            'click .action-cancel-transcript-preferences': 'destroyView'
         },
 
         initialize: function(options) {
@@ -87,20 +88,27 @@ function($, Backbone, _, gettext, HtmlUtils, StringUtils, TranscriptLanguagesVie
                     HtmlUtils.append(
                         $languagesContainer,
                         HtmlUtils.joinHtml(
+                            HtmlUtils.HTML('<div class="transcript-language-menu-container">'),
                             HtmlUtils.interpolateHtml(
                                 HtmlUtils.HTML('<span>{languageDisplayName}</span>'),
                                 {
                                     languageDisplayName: self.availableLanguages[activeLanguage]
                                 }
                             ),
-                            HtmlUtils.HTML('<a href="#" class="action-remove-language">Remove</a>')
+                            HtmlUtils.interpolateHtml(
+                                HtmlUtils.HTML('<a href="#" class="action-remove-language" data-language-code="{languageCode}">Remove</a>'),
+                                {
+                                    languageCode: activeLanguage
+                                }
+                            ),
+                            HtmlUtils.HTML('</div>')
                         )
                     );
                 }
             });
         },
 
-        languageSelected: function(event) {
+        languageAdded: function(event) {
             var $parentEl = $(event.target.parentElement),
                 selectedLanguage = $parentEl.find('select').val();
 
@@ -116,27 +124,43 @@ function($, Backbone, _, gettext, HtmlUtils, StringUtils, TranscriptLanguagesVie
                                 languageDisplayName: this.availableLanguages[selectedLanguage]
                             }
                         ),
-                        HtmlUtils.HTML('<a href="#" class="action-remove-language">Remove</a>')
+                        HtmlUtils.interpolateHtml(
+                            HtmlUtils.HTML('<a href="#" class="action-remove-language" data-language-code="{languageCode}">Remove</a>'),
+                            {
+                                languageCode: selectedLanguage
+                            }
+                        )
                     )
                 )
             }
         },
 
         languageCancelled: function(event) {
-            var $parentEl = $(event.target.parentElement);
-            $parentEl.remove();
+            $(event.target.parentElement).remove();
         },
 
         languageRemoved: function(event) {
-            var $parentEl = $(event.target.parentElement),
-                selectedLanguage = $parentEl.find('select').val();
-
-            $parentEl.remove();
+            var selectedLanguage = $(event.target).data('language-code');
+            $(event.target.parentElement).remove();
             this.selectedLanguages.pop(selectedLanguage);
+        },
+
+        destroyView: function(event) {
+            // trigger destroy transcript event.
+            Backbone.trigger('videotranscripts:destroyTranscriptLanguages');
+
+            // Unbind any events associated
+            this.undelegateEvents();
+
+            // Empty this.$el content from DOM
+            this.$el.empty();
+
+            this.selectedLanguages = [];
         },
 
         submitSelectedLanguages: function(event) {
             Backbone.trigger('videotranscripts:saveTranscriptPreferences', this.selectedLanguages);
+            this.destroyView();
         }
     });
 
