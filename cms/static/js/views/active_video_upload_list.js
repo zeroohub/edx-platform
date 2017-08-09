@@ -45,8 +45,9 @@ define([
                 this.listenTo(this.collection, 'add', this.addUpload);
                 this.concurrentUploadLimit = options.concurrentUploadLimit || 0;
                 this.postUrl = options.postUrl;
-                this.activeTranscriptionPlan = options.activeTranscriptionPlan;
-                this.availableTranscriptionPlans = options.availableTranscriptionPlans;
+                this.activeTranscriptionPlan = options.activeTranscriptPreferences;
+                this.availableTranscriptionPlans = options.videoTranscriptSettings['transcription_plans'];
+                this.transcriptHandlerUrl = options.videoTranscriptSettings['transcript_preferences_handler_url'];
                 this.videoSupportedFileFormats = options.videoSupportedFileFormats;
                 this.videoUploadMaxFileSizeInGB = options.videoUploadMaxFileSizeInGB;
                 this.onFileUploadDone = options.onFileUploadDone;
@@ -83,7 +84,9 @@ define([
             },
 
             getTurnaroundPlan: function() {
-                return this.availableTranscriptionPlans[this.selectedProvider].turnaround;
+                if (this.selectedProvider){
+                    return this.availableTranscriptionPlans[this.selectedProvider].turnaround;
+                }
             },
 
             getFidelityPlan: function() {
@@ -93,11 +96,13 @@ define([
             },
 
             getPlanLanguages: function() {
-                var selectedPlan = this.availableTranscriptionPlans[this.selectedProvider];
-                if (this.selectedProvider == 'Cielo24') {
-                    return selectedPlan.fidelity[this.selectedFidelityPlan].languages;
+                if (this.selectedProvider){
+                    var selectedPlan = this.availableTranscriptionPlans[this.selectedProvider];
+                    if (this.selectedProvider == 'Cielo24') {
+                        return selectedPlan.fidelity[this.selectedFidelityPlan].languages;
+                    }
+                    return selectedPlan.languages;
                 }
-                return selectedPlan.languages;
             },
 
             fidelitySelected: function(event) {
@@ -119,7 +124,7 @@ define([
                 var isTurnaroundSelected = this.$el.find('#transcript-turnaround')[0].options.selectedIndex,
                     isFidelitySelected = this.$el.find('#transcript-fidelity')[0].options.selectedIndex;
 
-                if ((isTurnaroundSelected && this.selectedProvider === '3PlayMedia') || (isTurnaroundSelected && isFidelitySelected)) {
+                if ((isTurnaroundSelected > 0 && this.selectedProvider === '3PlayMedia') || (isTurnaroundSelected  > 0 && isFidelitySelected > 0)) {
                     this.availableLanguages = this.getPlanLanguages();
                     this.$el.find('.transcript-languages-action-wrapper').show();
                 } else {
@@ -156,16 +161,18 @@ define([
                     $provider.append(option);
                 });
 
-                // Turnaround dropdown
-                $turnaround.empty().append(new Option('Select turnaround', ''));
-                _.each(turnaroundPlan, function(value, key){
-                    var option = new Option(value, key);
-                    if (self.selectedTurnaroundPlan === key) {
-                        option.selected = true;
-                    }
-                    $turnaround.append(option);
-                });
-                self.$el.find('.transcript-turnaround-wrapper').show();
+                if(turnaroundPlan) {
+                    // Turnaround dropdown
+                    $turnaround.empty().append(new Option('Select turnaround', ''));
+                    _.each(turnaroundPlan, function (value, key) {
+                        var option = new Option(value, key);
+                        if (self.selectedTurnaroundPlan === key) {
+                            option.selected = true;
+                        }
+                        $turnaround.append(option);
+                    });
+                    self.$el.find('.transcript-turnaround-wrapper').show();
+                }
 
                 // Fidelity dropdown
                 if (fidelityPlan) {
@@ -211,7 +218,6 @@ define([
                     three_play_turnaround: this.selectedProvider === '3PlayMedia' ? this.selectedTurnaroundPlan : '',
                     preferred_languages: this.activeLanguages
                 }
-                debugger;
                 // TODO: send ajax to video handler.
             },
 

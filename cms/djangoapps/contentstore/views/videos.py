@@ -568,7 +568,7 @@ def videos_index_html(course):
 
     if WAFFLE_SWITCHES.is_enabled(THIRD_PARTY_TRANSCRIPTION_ENABLED):
         context.update({
-            'third_party_transcript_settings': {
+            'video_transcript_settings': {
                 'transcript_preferences_handler_url': reverse_course_url(
                     'transcript_preferences_handler',
                     unicode(course.id)
