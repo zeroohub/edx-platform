@@ -13,7 +13,7 @@
 </form>
 <% if (videoTranscriptEnabled) { %>
 <div class='transcript-settings-container'>
-    <div class="transcript-settings-header"><%- gettext('Course Video Settings') %></div>
+    <div class="transcript-settings-header"><%- gettext('Video Transcript Settings') %></div>
     <div class='transcript-settings-wrapper'>
         <div class='transcript-provider-wrapper'>
             <label>
