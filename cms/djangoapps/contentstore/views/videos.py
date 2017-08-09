@@ -294,7 +294,7 @@ def validate_transcript_preferences(
                 # validate transcription languages
                 supported_languages = transcription_plans[provider]['fidelity'][cielo24_fidelity]['languages']
                 preferred_languages = set(preferred_languages)
-                if preferred_languages <= set(supported_languages.keys()):
+                if not (preferred_languages <= set(supported_languages.keys())):
                     error = 'invalid languages'
                     return error, preferences
 
@@ -335,18 +335,19 @@ def validate_transcript_preferences(
 @login_required
 @require_POST
 def transcript_preferences_handler(request, course_key_string):
-    from nose.tools import set_trace;set_trace()
+
     # respond with a 404 if this feature is not enabled.
     if not WAFFLE_SWITCHES.is_enabled(THIRD_PARTY_TRANSCRIPTION_ENABLED):
         return HttpResponseNotFound()
 
-    provider = request.data.get('provider')
+    data = request.json
+    provider = data.get('provider', '')
     error, preferences = validate_transcript_preferences(
         provider=provider,
-        cielo24_fidelity=request.data.get('cielo24_fidelity'),
-        cielo24_turnaround=request.data.get('cielo24_turnaround'),
-        three_play_turnaround=request.data.get('three_play_turnaround'),
-        preferred_languages=request.data.get('preferred_languages', [])
+        cielo24_fidelity=data.get('cielo24_fidelity', ''),
+        cielo24_turnaround=data.get('cielo24_turnaround', ''),
+        three_play_turnaround=data.get('three_play_turnaround', ''),
+        preferred_languages=data.get('preferred_languages', [])
     )
 
     if error:

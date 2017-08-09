@@ -213,14 +213,18 @@ define([
 
             saveTranscriptPreferences: function(selectedLanguages) {
                 this.activeLanguages = selectedLanguages;
-                var data = {
+                $.postJSON(this.transcriptHandlerUrl, {
                     provider: this.selectedProvider,
                     cielo24_fidelity: this.selectedFidelityPlan,
                     cielo24_turnaround: this.selectedProvider === 'Cielo24' ? this.selectedTurnaroundPlan : '',
                     three_play_turnaround: this.selectedProvider === '3PlayMedia' ? this.selectedTurnaroundPlan : '',
                     preferred_languages: this.activeLanguages
-                }
-                // TODO: send ajax to video handler.
+                }, function(data) {
+                    // TODO: check
+                })
+                .fail(function() {
+                    // TODO: check
+                });
             },
 
             render: function() {
