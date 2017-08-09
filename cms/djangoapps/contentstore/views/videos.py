@@ -335,7 +335,7 @@ def validate_transcript_preferences(
 @login_required
 @require_POST
 def transcript_preferences_handler(request, course_key_string):
-
+    from nose.tools import set_trace;set_trace()
     # respond with a 404 if this feature is not enabled.
     if not WAFFLE_SWITCHES.is_enabled(THIRD_PARTY_TRANSCRIPTION_ENABLED):
         return HttpResponseNotFound()
@@ -563,20 +563,20 @@ def videos_index_html(course):
             'max_width': settings.VIDEO_IMAGE_MAX_WIDTH,
             'max_height': settings.VIDEO_IMAGE_MAX_HEIGHT,
             'supported_file_formats': settings.VIDEO_IMAGE_SUPPORTED_FILE_FORMATS
-        }
+        },
+        'video_transcript_settings': {},
+        'active_transcript_preferences': {}
     }
 
     if WAFFLE_SWITCHES.is_enabled(THIRD_PARTY_TRANSCRIPTION_ENABLED):
-        context.update({
-            'video_transcript_settings': {
-                'transcript_preferences_handler_url': reverse_course_url(
-                    'transcript_preferences_handler',
-                    unicode(course.id)
-                ),
-                'transcription_plans': get_3rd_party_transcription_plans(),
-            },
-            'active_transcript_preferences': get_transcript_preferences(unicode(course.id))
-        })
+        context['video_transcript_settings'] =  {
+            'transcript_preferences_handler_url': reverse_course_url(
+                'transcript_preferences_handler',
+                unicode(course.id)
+            ),
+            'transcription_plans': get_3rd_party_transcription_plans(),
+        }
+        context['active_transcript_preferences'] = get_transcript_preferences(unicode(course.id))
 
     return render_to_response('videos_index.html', context)
 
@@ -651,6 +651,7 @@ def videos_post(course, request):
 
         edx_video_id = unicode(uuid4())
         key = storage_service_key(bucket, file_name=edx_video_id)
+        # TODO: set transcript preferences in metadata too
         for metadata_name, value in [
                 ('course_video_upload_token', course_video_upload_token),
                 ('client_video_id', file_name),

@@ -39,6 +39,7 @@ define([
             defaultFailureMessage: gettext('This may be happening because of an error with our server or your internet connection. Try refreshing the page or making sure you are online.'),  // eslint-disable-line max-len
 
             initialize: function(options) {
+                var videoTranscriptSettings = options.videoTranscriptSettings;
                 this.template = HtmlUtils.template(activeVideoUploadListTemplate);
                 this.collection = new Backbone.Collection();
                 this.itemViews = [];
@@ -46,8 +47,9 @@ define([
                 this.concurrentUploadLimit = options.concurrentUploadLimit || 0;
                 this.postUrl = options.postUrl;
                 this.activeTranscriptionPlan = options.activeTranscriptPreferences;
-                this.availableTranscriptionPlans = options.videoTranscriptSettings['transcription_plans'];
-                this.transcriptHandlerUrl = options.videoTranscriptSettings['transcript_preferences_handler_url'];
+                this.availableTranscriptionPlans = videoTranscriptSettings['transcription_plans'];
+                this.transcriptHandlerUrl = videoTranscriptSettings['transcript_preferences_handler_url'];
+                this.videoTranscriptEnabled = !_.isEmpty(this.activeTranscriptionPlan) || !_.isEmpty(this.availableTranscriptionPlans) ? true : false;
                 this.videoSupportedFileFormats = options.videoSupportedFileFormats;
                 this.videoUploadMaxFileSizeInGB = options.videoUploadMaxFileSizeInGB;
                 this.onFileUploadDone = options.onFileUploadDone;
@@ -142,7 +144,7 @@ define([
                 }
             },
 
-            populatePreferenceOptions: function(isFirstRender) {
+            populatePreferenceOptions: function() {
                 var self = this,
                     providerPlan = self.getProviderPlan(),
                     turnaroundPlan = self.getTurnaroundPlan(),
@@ -230,12 +232,16 @@ define([
                         uploadHeader: this.uploadHeader,
                         uploadText: this.uploadText,
                         maxSizeText: this.maxSizeText,
+                        videoTranscriptEnabled: this.videoTranscriptEnabled,
                         supportedVideosText: this.supportedVideosText
                     })
                 );
                 _.each(this.itemViews, this.renderUploadView.bind(this));
                 this.$uploadForm = this.$('.file-upload-form');
                 this.$dropZone = this.$uploadForm.find('.file-drop-area');
+                if (this.videoTranscriptEnabled) {
+                    this.$uploadForm.addClass('video-transcript-enabled');
+                }
                 this.$uploadForm.fileupload({
                     type: 'PUT',
                     singleFileUploads: false,
@@ -260,8 +266,9 @@ define([
                 $(window).on('unload', this.onUnload.bind(this));
 
                 // populate video transcript
-                this.populatePreferenceOptions(true);
-
+                if (this.videoTranscriptEnabled){
+                    this.populatePreferenceOptions();
+                }
                 return this;
             },
 

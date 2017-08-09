@@ -11,6 +11,7 @@
     </div>
     <input type="file" class="sr js-file-input" name="file" multiple>
 </form>
+<% if (videoTranscriptEnabled) { %>
 <div class='transcript-settings-container'>
     <div class="transcript-settings-header"><%- gettext('Course Video Settings') %></div>
     <div class='transcript-settings-wrapper'>
@@ -38,6 +39,7 @@
         <div class='transcript-languages-wrapper'></div>
     </div>
 </div>
+<% } %>
 </div>
 <section class="active-video-upload-container">
     <h3 class="sr"><%= gettext("Active Uploads") %></h3>
