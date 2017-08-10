@@ -26,5 +26,10 @@ export class CourseHome {  // eslint-disable-line import/prefer-default-export
         },
       );
     });
+
+    const $addToCalendarLinks = $('.addeventatc span');
+    $addToCalendarLinks.on('click', () => {
+      alert('clicked a calendar, send log!');
+    });
   }
 }
