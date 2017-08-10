@@ -619,16 +619,17 @@ def videos_post(course, request):
     The returned array corresponds exactly to the input array.
     """
     error = None
-    if 'files' not in request.json:
+    data = request.json
+    if 'files' not in data:
         error = "Request object is not JSON or does not contain 'files'"
     elif any(
             'file_name' not in file or 'content_type' not in file
-            for file in request.json['files']
+            for file in data['files']
     ):
         error = "Request 'files' entry does not contain 'file_name' and 'content_type'"
     elif any(
             file['content_type'] not in VIDEO_SUPPORTED_FILE_FORMATS.values()
-            for file in request.json['files']
+            for file in data['files']
     ):
         error = "Request 'files' entry contain unsupported content_type"
 
@@ -637,7 +638,7 @@ def videos_post(course, request):
 
     bucket = storage_service_bucket()
     course_video_upload_token = course.video_upload_pipeline['course_video_upload_token']
-    req_files = request.json['files']
+    req_files = data['files']
     resp_files = []
 
     for req_file in req_files:
@@ -651,11 +652,18 @@ def videos_post(course, request):
 
         edx_video_id = unicode(uuid4())
         key = storage_service_key(bucket, file_name=edx_video_id)
-        for metadata_name, value in [
-                ('course_video_upload_token', course_video_upload_token),
-                ('client_video_id', file_name),
-                ('course_key', unicode(course.id)),
-        ]:
+
+        metadata_list = [
+            ('course_video_upload_token', course_video_upload_token),
+            ('client_video_id', file_name),
+            ('course_key', unicode(course.id)),
+        ]
+
+        transcript_preferences = data.get('transcript_preferences', None)
+        if transcript_preferences is not None:
+            metadata_list.append(('transcript_preferences', transcript_preferences))
+
+        for metadata_name, value in metadata_list:
             key.set_metadata(metadata_name, value)
         upload_url = key.generate_url(
             KEY_EXPIRATION_IN_SECONDS,
