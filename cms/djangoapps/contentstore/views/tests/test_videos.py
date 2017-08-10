@@ -24,8 +24,11 @@ from contentstore.utils import reverse_course_url
 from contentstore.views.videos import (
     _get_default_video_image_url,
     validate_video_image,
+    validate_transcript_preferences,
     VIDEO_IMAGE_UPLOAD_ENABLED,
+    THIRD_PARTY_TRANSCRIPTION_ENABLED,
     WAFFLE_SWITCHES,
+    TranscriptProvider
 )
 from contentstore.views.videos import KEY_EXPIRATION_IN_SECONDS, StatusDisplayStrings, convert_video_status
 from xmodule.modulestore.tests.factories import CourseFactory
@@ -853,6 +856,126 @@ class VideoImageTestCase(VideoUploadTestBase, CourseTestCase):
             else:
                 self.verify_image_upload_reponse(self.course.id, edx_video_id, response)
 
+
+@ddt.ddt
+@patch.dict('django.conf.settings.FEATURES', {'ENABLE_VIDEO_UPLOAD_PIPELINE': True})
+class VideoTranscriptTestCase(VideoUploadTestBase, CourseTestCase):
+    """
+    Tests for video transcripts.
+    """
+
+    VIEW_NAME = 'transcript_preferences_handler'
+
+    @override_switch(THIRD_PARTY_TRANSCRIPTION_ENABLED, False)
+    def test_video_transcript_disabled(self):
+        """
+        Tests the video transcript when the feature is disabled.
+        """
+        video_transcript_url = self.get_url_for_course_key(self.course.id)
+        response = self.client.post(video_transcript_url, {})
+        self.assertEqual(response.status_code, 404)
+
+
+    @ddt.data(
+        # Error cases
+        (
+            {},
+            'Invalid provider.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.CIELO24
+            },
+            'Invalid cielo24 fidelity.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.CIELO24,
+                'cielo24_fidelity': 'PROFESSIONAL',
+            },
+            'Invalid cielo24 turnaround.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.CIELO24,
+                'cielo24_fidelity': 'PROFESSIONAL',
+                'cielo24_turnaround': 'STANDARD'
+            },
+            'Invalid languages.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.CIELO24,
+                'cielo24_fidelity': 'PROFESSIONAL',
+                'cielo24_turnaround': 'STANDARD',
+                'preferred_languages': ['es', 'ur']
+            },
+            'Invalid languages.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.THREE_PLAY_MEDIA
+            },
+            'Invalid 3play turnaround.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.THREE_PLAY_MEDIA,
+                'three_play_turnaround': 'default'
+            },
+            'Invalid languages.'
+        ),
+        (
+            {
+                'provider': TranscriptProvider.THREE_PLAY_MEDIA,
+                'three_play_turnaround': 'default',
+                'preferred_languages': ['es', 'ur']
+            },
+            'Invalid languages.'
+        ),
+        # Success
+        (
+            {
+                'provider': TranscriptProvider.CIELO24,
+                'cielo24_fidelity': 'PROFESSIONAL',
+                'cielo24_turnaround': 'STANDARD',
+                'preferred_languages': ['en']
+            },
+            ''
+        ),
+        (
+            {
+                'provider': TranscriptProvider.THREE_PLAY_MEDIA,
+                'three_play_turnaround': 'default',
+                'preferred_languages': ['en']
+            },
+            ''
+        )
+    )
+    @ddt.unpack
+    @override_switch(THIRD_PARTY_TRANSCRIPTION_ENABLED, True)
+    def test_video_transcript(self, preferences, error_message):
+        """
+        Tests that transcript handler worrks correctly.
+        """
+        video_transcript_url = self.get_url_for_course_key(self.course.id)
+        response = self.client.post(
+            video_transcript_url,
+            json.dumps({
+                'provider': preferences.get('provider', ''),
+                'cielo24_fidelity': preferences.get('cielo24_fidelity', ''),
+                'cielo24_turnaround': preferences.get('cielo24_turnaround', ''),
+                'three_play_turnaround': preferences.get('three_play_turnaround', ''),
+                'preferred_languages': preferences.get('preferred_languages', []),
+            }),
+            content_type='application/json'
+        )
+        response = json.loads(response.content)
+        if error_message:
+            self.assertEqual(response['status'], 400)
+            self.assertEqual(response['error'], error_message)
+        else:
+            self.assertTrue('transcript_preferences' in response)
 
 @patch.dict("django.conf.settings.FEATURES", {"ENABLE_VIDEO_UPLOAD_PIPELINE": True})
 @override_settings(VIDEO_UPLOAD_PIPELINE={"BUCKET": "test_bucket", "ROOT_PATH": "test_root"})

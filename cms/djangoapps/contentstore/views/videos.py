@@ -281,52 +281,51 @@ def validate_transcript_preferences(
         # Further validations for providers
         if provider == TranscriptProvider.CIELO24:
 
-            # validate transcription fidelity
+            # Validate transcription fidelity
             supported_fidelities = transcription_plans[provider]['fidelity']
             if cielo24_fidelity in supported_fidelities.keys():
 
-                # validate transcription turnaround
+                # Validate transcription turnaround
                 supported_turnarounds = transcription_plans[provider]['turnaround']
                 if cielo24_turnaround not in supported_turnarounds.keys():
-                    error = 'invalid cielo24 turnaround'
+                    error = _('Invalid cielo24 turnaround.')
                     return error, preferences
 
-                # validate transcription languages
+                # Validate transcription languages
                 supported_languages = transcription_plans[provider]['fidelity'][cielo24_fidelity]['languages']
-                preferred_languages = set(preferred_languages)
-                if preferred_languages <= set(supported_languages.keys()):
-                    error = 'invalid languages'
+                if not len(preferred_languages) or not (set(preferred_languages) <= set(supported_languages.keys())):
+                    error = _('Invalid languages.')
                     return error, preferences
 
-                # validated Cielo24 preferences
+                # Validated Cielo24 preferences
                 preferences = {
                     'cielo24_fidelity': cielo24_fidelity,
                     'cielo24_turnaround': cielo24_turnaround,
                     'preferred_languages': list(preferred_languages),
                 }
             else:
-                error = 'invalid cielo24 fidelity'
+                error = _('Invalid cielo24 fidelity.')
         elif provider == TranscriptProvider.THREE_PLAY_MEDIA:
-            # validate transcription turnaround
+
+            # Validate transcription turnaround
             supported_turnarounds = transcription_plans[provider]['turnaround']
             if three_play_turnaround not in supported_turnarounds.keys():
-                error = 'invalid cielo24 turnaround'
+                error = _('Invalid 3play turnaround.')
                 return error, preferences
 
-            # validate transcription languages
+            # Validate transcription languages
             supported_languages = transcription_plans[provider]['languages']
-            preferred_languages = set(preferred_languages)
-            if preferred_languages <= set(supported_languages.keys()):
-                error = 'invalid languages'
+            if not len(preferred_languages) or not (set(preferred_languages) <= set(supported_languages.keys())):
+                error = _('Invalid languages.')
                 return error, preferences
 
-            # validated 3PlayMedia preferences
+            # Validated 3PlayMedia preferences
             preferences = {
                 'three_play_turnaround': three_play_turnaround,
                 'preferred_languages': list(preferred_languages),
             }
     else:
-        error = 'invalid provider.'
+        error = _('Invalid provider.')
 
     return error, preferences
 
@@ -336,17 +335,18 @@ def validate_transcript_preferences(
 @require_POST
 def transcript_preferences_handler(request, course_key_string):
 
-    # respond with a 404 if this feature is not enabled.
+    # Respond with a 404 if this feature is not enabled.
     if not WAFFLE_SWITCHES.is_enabled(THIRD_PARTY_TRANSCRIPTION_ENABLED):
         return HttpResponseNotFound()
 
-    provider = request.data.get('provider')
+    data = request.json
+    provider = data.get('provider', '')
     error, preferences = validate_transcript_preferences(
         provider=provider,
-        cielo24_fidelity=request.data.get('cielo24_fidelity'),
-        cielo24_turnaround=request.data.get('cielo24_turnaround'),
-        three_play_turnaround=request.data.get('three_play_turnaround'),
-        preferred_languages=request.data.get('preferred_languages', [])
+        cielo24_fidelity=data.get('cielo24_fidelity', ''),
+        cielo24_turnaround=data.get('cielo24_turnaround', ''),
+        three_play_turnaround=data.get('three_play_turnaround', ''),
+        preferred_languages=data.get('preferred_languages', [])
     )
 
     if error:
