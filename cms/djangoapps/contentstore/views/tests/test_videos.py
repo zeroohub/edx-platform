@@ -977,6 +977,51 @@ class VideoTranscriptTestCase(VideoUploadTestBase, CourseTestCase):
         else:
             self.assertTrue('transcript_preferences' in response)
 
+    @ddt.data(
+        None,
+        {
+            'provider': TranscriptProvider.CIELO24,
+            'cielo24_fidelity': 'PROFESSIONAL',
+            'cielo24_turnaround': 'STANDARD',
+            'preferred_languages': ['en']
+        }
+    )
+    @override_settings(AWS_ACCESS_KEY_ID='test_key_id', AWS_SECRET_ACCESS_KEY='test_secret')
+    @patch('boto.s3.key.Key')
+    @patch('boto.s3.connection.S3Connection')
+    def test_transcript_preferences_metadata(self, transcript_preferences, mock_conn, mock_key):
+        """
+        Tests that transcript preference metadata is only set if it is transcript
+        preferences are present in request data.
+        """
+        file_name = 'test-video.mp4'
+        request_data = {'files': [{'file_name': file_name, 'content_type': 'video/mp4'}]}
+
+        if transcript_preferences:
+            request_data.update({'transcript_preferences': transcript_preferences})
+
+        bucket = Mock()
+        mock_conn.return_value = Mock(get_bucket=Mock(return_value=bucket))
+        mock_key_instance = Mock(
+            generate_url=Mock(
+                return_value='http://example.com/url_{file_name}'.format(file_name=file_name)
+            )
+        )
+        # If extra calls are made, return a dummy
+        mock_key.side_effect = [mock_key_instance] + [Mock()]
+
+        videos_handler_url = reverse_course_url('videos_handler', self.course.id)
+        response = self.client.post(videos_handler_url, json.dumps(request_data), content_type='application/json')
+        self.assertEqual(response.status_code, 200)
+
+        # Ensure `transcript_preferences` was set up in Key correctly if sent through request.
+        if transcript_preferences:
+            mock_key_instance.set_metadata.assert_any_call('transcript_preferences', transcript_preferences)
+        else:
+            with self.assertRaises(AssertionError):
+                mock_key_instance.set_metadata.assert_any_call('transcript_preferences', transcript_preferences)
+
+
 @patch.dict("django.conf.settings.FEATURES", {"ENABLE_VIDEO_UPLOAD_PIPELINE": True})
 @override_settings(VIDEO_UPLOAD_PIPELINE={"BUCKET": "test_bucket", "ROOT_PATH": "test_root"})
 class VideoUrlsCsvTestCase(VideoUploadTestMixin, CourseTestCase):
