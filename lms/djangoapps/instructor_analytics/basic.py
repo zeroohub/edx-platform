@@ -336,11 +336,11 @@ def get_proctored_exam_results(course_key, features):
             (feature, exam_attempt.get(feature)) for feature in features if feature in exam_attempt
         )
 
-        proctored_exam.update({
-            '{status} Count': len(exam_attempt.get('{status} Comments', [])),
-            '{status} Comments': exam_attempt.get('{status} Comments', []).join('; '),
-            for status in comment_statuses
-        })
+        for status in comment_statuses:
+            proctored_exam.update({
+                '{status} Count': len(exam_attempt.get('{status} Comments', [])),
+                '{status} Comments': exam_attempt.get('{status} Comments', []).join('; '),
+            })
 
         return proctored_exam
 
