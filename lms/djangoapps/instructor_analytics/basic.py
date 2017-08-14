@@ -339,7 +339,7 @@ def get_proctored_exam_results(course_key, features):
         for status in comment_statuses:
             proctored_exam.update({
                 '{status} Count': len(exam_attempt.get('{status} Comments', [])),
-                '{status} Comments': exam_attempt.get('{status} Comments', []).join('; '),
+                '{status} Comments': '; '.join(exam_attempt.get('{status} Comments', [])),
             })
 
         return proctored_exam
