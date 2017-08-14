@@ -1459,14 +1459,21 @@ def get_proctored_exam_results(request, course_id):
     get the proctored exam resultsreport for the particular course.
     """
     query_features = [
-        'user_email',
+        'course_id',
         'exam_name',
+        'username',
+        'email',
         'attempt_code',
         'allowed_time_limit_mins',
         'is_sample_attempt',
         'started_at',
         'completed_at',
         'status',
+        'review_status',
+        'Suspicious Count',
+        'Suspicious Comments',
+        'Rules Violation Count',
+        'Rules Violation Comments'
     ]
 
     course_key = CourseKey.from_string(course_id)
