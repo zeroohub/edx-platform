@@ -1458,27 +1458,9 @@ def get_proctored_exam_results(request, course_id):
     """
     get the proctored exam resultsreport for the particular course.
     """
-    query_features = [
-        'course_id',
-        'exam_name',
-        'username',
-        'email',
-        'attempt_code',
-        'allowed_time_limit_mins',
-        'is_sample_attempt',
-        'started_at',
-        'completed_at',
-        'status',
-        'review_status',
-        'Suspicious Count',
-        'Suspicious Comments',
-        'Rules Violation Count',
-        'Rules Violation Comments'
-    ]
-
     course_key = CourseKey.from_string(course_id)
     report_type = _('proctored exam results')
-    lms.djangoapps.instructor_task.api.submit_proctored_exam_results_report(request, course_key, query_features)
+    lms.djangoapps.instructor_task.api.submit_proctored_exam_results_report(request, course_key)
     success_status = SUCCESS_MESSAGE_TEMPLATE.format(report_type=report_type)
 
     return JsonResponse({"status": success_status})

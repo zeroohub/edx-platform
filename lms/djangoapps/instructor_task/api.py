@@ -439,7 +439,7 @@ def submit_proctored_exam_results_report(request, course_key, features):  # pyli
     """
     task_type = 'proctored_exam_results_report'
     task_class = proctored_exam_results_csv
-    task_input = {'features': features}
+    task_input = {}
     task_key = ""
 
     return submit_task(request, task_type, task_class, course_key, task_input, task_key)
