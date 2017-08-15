@@ -187,6 +187,53 @@
                             })
                         }
                     ]
+                },
+                {
+                    title: gettext('Social Links'),
+                    fields: [
+                        {
+                            view: new AccountSettingsFieldViews.TextFieldView({
+                                model: userAccountModel,
+                                title: gettext('Facebook Link'),
+                                valueAttribute: 'facebook_link',
+                                helpMessage: gettext(
+                                    'Optionally, link to your Facebook profile from your edX learner profile ' +
+                                    'by adding the URL to your personal page or your username, found at ' +
+                                    'facebook.com/[your_username].'
+                                ),
+                                persistChanges: true,
+                                placeholder: gettext('ex: www.facebook.com/edX')
+                            }),
+                        },
+                        {
+                            view: new AccountSettingsFieldViews.TextFieldView({
+                                model: userAccountModel,
+                                title: gettext('Twitter Link'),
+                                valueAttribute: 'twitter_link',
+                                helpMessage: gettext(
+                                    'Optionally, link to your Twitter profile from your edX learner profile ' +
+                                    'by adding the URL to your personal page or your username, found at ' +
+                                    'twitter.com/[your_username].'
+                                ),
+                                persistChanges: true,
+                                placeholder: gettext('ex: www.twitter.com/edXOnline')
+                            }),
+                        },
+                        {
+                            view: new AccountSettingsFieldViews.TextFieldView({
+                                model: userAccountModel,
+                                title: gettext('LinkedIn Link'),
+                                valueAttribute: 'linkedin_link',
+                                helpMessage: gettext(
+                                    'Optionally, link to your LinkedIn profile from your edX learner profile ' +
+                                    'by adding the URL to your personal page or your username, found at ' +
+                                    'linkedin.com/in/[your_username].'
+                                ),
+                                persistChanges: true,
+                                placeholder: gettext('ex: www.linkedin.com/in/agarwaledu/')
+                            }),
+                        },
+                    ]
                 }
             ];
 

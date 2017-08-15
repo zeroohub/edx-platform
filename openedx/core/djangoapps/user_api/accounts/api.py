@@ -169,6 +169,19 @@ def update_account_settings(requesting_user, update, username=None):
                 "user_message": err.message
             }
 
+    # If the user asked to change a social link, validate it.
+    social_fields = ["facebook_link", "twitter_link", "linkedin_link"]
+    for link, social_field in enumerate(social_fields):
+        if social_field in update:
+            try:
+                new_social_link = update[social_field]
+                student_views.validate_social_link(social_field, new_social_link)
+            except ValueError as err:
+                field_errors[social_field] = {
+                    "developer_message": u"Error thrown from adding new social link: '{}'".format(err.message),
+                    "user_message": err.message
+                }
+
     # If we have encountered any validation errors, return them to the user.
     if field_errors:
         raise errors.AccountValidationError(field_errors)

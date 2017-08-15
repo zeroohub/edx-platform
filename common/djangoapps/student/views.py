@@ -2697,6 +2697,35 @@ def validate_new_email(user, new_email):
     if User.objects.filter(email=new_email).count() != 0:
         raise ValueError(_('An account with this e-mail already exists.'))
 
+def validate_social_link(social_field, new_social_link):
+    """
+    Given a new social link for a user. The social link can take three forms:
+    
+    1) A valid url that comes from the correct social site
+    2) A valid username
+    3) A blank value
+    """
+    # Check if the link contains a valid url
+    required_website = '{}.com/'.format(social_field.split('_')[0])
+    contains_social_url = required_website in new_social_link
+
+    # Check if the link contains a valid username
+    contains_valid_username = is_valid_username(new_social_link)
+
+    # Check if the link is blank
+    is_empty = not new_social_link
+
+    # Assure that the new link has the either correct website url, a valid username or is empty
+    if not (contains_social_url or contains_valid_username or is_empty):
+        raise ValueError(_(' Make sure that you are providing a valid URL or username. To remove the field, simply' +
+                           ' leave it blank.'))
+
+def is_valid_username(value):
+    """
+    Given a particular string, returns whether the string can be considered a safe username.
+    A safe username contains only hyphens, underscores or other alphanumerical characters.
+    """
+    return value.replace('_', '').replace('-', '').isalnum()
 
 def do_email_change_request(user, new_email, activation_key=None):
     """

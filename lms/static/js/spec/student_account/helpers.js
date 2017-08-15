@@ -76,6 +76,9 @@ define(['underscore'], function(_) {
         country: '1',
         language: null,
         bio: 'About the student',
+        facebook_link: '',
+        twitter_link: '',
+        linkedin_link: '',
         language_proficiencies: [{code: '1'}],
         profile_image: PROFILE_IMAGE,
         accomplishments_shared: false

@@ -177,6 +177,14 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
                     'Year of Birth',
                     'Preferred Language',
                 ]
+            },
+            {
+                'title': 'Social Links',
+                'fields': [
+                    'Facebook Link',
+                    'Twitter Link',
+                    'LinkedIn Link',
+                ]
             }
         ]
 
@@ -459,6 +467,30 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
                     'language_proficiencies', [], [{'code': 'ps'}], table='student_languageproficiency'),
                 self.expected_settings_changed_event(
                     'language_proficiencies', [{'code': 'ps'}], [], table='student_languageproficiency'),
+            ],
+            actual_events
+        )
+
+    def test_social_url_field(self):
+        """
+        Test behaviour of "Facebook Link" field.
+        
+        The same behavior will apply to the "Twitter" and "LinkedIn"
+        social link fields.
+        """
+        self._test_text_field(
+            u'facebook_link',
+            u'Facebook Link',
+            self.facebook_url,
+            u'www.google.com/invalid',
+            [u'www.facebook.com/validuser', self.facebook_url],
+        )
+
+        actual_events = self.wait_for_events(event_filter=self.settings_changed_event_filter, number_of_matches=2)
+        self.assert_events_match(
+            [
+                self.expected_settings_changed_event('facebook_link', self.facebook_url, 'www.facebook.com/validuser'),
+                self.expected_settings_changed_event('facebook_link', 'www.facebook.com/validuser', self.facebook_url),
             ],
             actual_events
         )

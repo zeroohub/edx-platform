@@ -99,7 +99,10 @@ class UserReadOnlySerializer(serializers.Serializer):
             "mailing_address": None,
             "requires_parental_consent": None,
             "accomplishments_shared": accomplishments_shared,
-            "account_privacy": self.configuration.get('default_visibility')
+            "account_privacy": self.configuration.get('default_visibility'),
+            "facebook_link": None,
+            "twitter_link": None,
+            "linkedin_link": None
         }
 
         if user_profile:
@@ -122,7 +125,10 @@ class UserReadOnlySerializer(serializers.Serializer):
                     ),
                     "mailing_address": user_profile.mailing_address,
                     "requires_parental_consent": user_profile.requires_parental_consent(),
-                    "account_privacy": get_profile_visibility(user_profile, user, self.configuration)
+                    "account_privacy": get_profile_visibility(user_profile, user, self.configuration),
+                    "facebook_link": user_profile.facebook_link,
+                    "twitter_link": user_profile.twitter_link,
+                    "linkedin_link": user_profile.linkedin_link
                 }
             )
 
@@ -172,8 +178,8 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
     class Meta(object):
         model = UserProfile
         fields = (
-            "name", "gender", "goals", "year_of_birth", "level_of_education", "country",
-            "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies"
+            "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "facebook_link", "twitter_link",
+            "linkedin_link", "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies"
         )
         # Currently no read-only field, but keep this so view code doesn't need to know.
         read_only_fields = ()
