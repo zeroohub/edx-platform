@@ -1192,9 +1192,10 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
                     'enable_timed_exams': xblock.enable_timed_exams
                 })
             elif xblock.category == 'sequential':
+                DEFAULT_RULES_URL = "https://edx.readthedocs.io/projects/edx-guide-for-students/en/latest/completing_assignments/proctored_exams/online_proctoring_rules_students.html#rules-for-online-proctoring"
                 xblock_info.update({
                     'is_proctored_exam': xblock.is_proctored_exam,
-                    'online_proctoring_rules': settings.PROCTORING_SETTINGS.get('LINK_URLS', {}).get('online_proctoring_rules', {}),
+                    'online_proctoring_rules': settings.PROCTORING_SETTINGS.get('LINK_URLS', {}).get('online_proctoring_rules', DEFAULT_RULES_URL),
                     'is_practice_exam': xblock.is_practice_exam,
                     'is_time_limited': xblock.is_time_limited,
                     'exam_review_rules': xblock.exam_review_rules,
