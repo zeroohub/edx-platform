@@ -304,13 +304,11 @@ def get_enterprise_consent_url(request, course_id, user=None, return_to=None):
     url_params = {
         'course_id': course_id,
         'next': return_path,
-        'failure_url': request.build_absolute_uri(
-            reverse('dashboard') + '?' + urlencode(
-                {
-                    CONSENT_FAILED_PARAMETER: course_id
-                }
-            )
-        ),
+        'failure_url': reverse('dashboard') + '?' + urlencode(
+            {
+                CONSENT_FAILED_PARAMETER: course_id
+            }
+        )
     }
     querystring = urlencode(url_params)
     full_url = reverse('grant_data_sharing_permissions') + '?' + querystring
