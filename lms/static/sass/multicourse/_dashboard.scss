@@ -1516,7 +1516,6 @@ a.fade-cover{
   }
 
   .other_text {
-    margin-top: 10px;
     margin-top: 0;
   }
 
@@ -1533,7 +1532,12 @@ a.fade-cover{
     margin-top: 10px;
     margin-left: 2.5%;
     margin-right: 2.5%;
-    color: white;
+    color: $white;
+  }
+
+  .survey_button:visited, .survey_button:hover, .survey_button:focus {
+    color: $white;
+    text-decoration: none;
   }
 
 }
