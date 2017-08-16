@@ -297,13 +297,13 @@ def get_enterprise_consent_url(request, course_id, user=None, return_to=None):
         return None
 
     if return_to is None:
-        return_path = request.path
+        return_path = request.get_full_path()
     else:
         return_path = reverse(return_to, args=(course_id,))
 
     url_params = {
         'course_id': course_id,
-        'next': request.build_absolute_uri(return_path),
+        'next': return_path,
         'failure_url': request.build_absolute_uri(
             reverse('dashboard') + '?' + urlencode(
                 {
