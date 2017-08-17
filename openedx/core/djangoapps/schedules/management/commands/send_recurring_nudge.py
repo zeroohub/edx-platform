@@ -35,6 +35,7 @@ class ScheduleStartResolver(RecipientResolver):
         for hour in range(24):
             for minute in range(60):
                 target_minute = target_date + datetime.timedelta(hours=hour) + datetime.timedelta(minutes=minute)
+                # TODO: what do we do about failed tasks?
                 _schedule_minute.delay(week, target_minute)
 
 
@@ -51,6 +52,7 @@ def _schedule_minute(week, target_time):
             language,
             context,
         )
+        # TODO: what do we do about failed send tasks?
         _schedule_send.delay(msg)
 
 
@@ -79,6 +81,7 @@ def _schedules_for_minute(target_time):
         course_id_str = str(enrollment.course_id)
         course = enrollment.course
 
+        # TODO: this produces a URL that contains the literal "+" character in the course key, which breaks sailthru
         course_root = reverse('course_root', kwargs={'course_id': course_id_str})
 
         def absolute_url(relative_path):
@@ -88,6 +91,9 @@ def _schedules_for_minute(target_time):
             'student_name': user.profile.name,
             'course_name': course.display_name,
             'course_url': absolute_url(course_root),
+
+            # This is used by the bulk email optout policy
+            'course_id': course_id_str,
         }
 
         yield (user, course.language, template_context)
