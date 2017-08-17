@@ -33,17 +33,15 @@ class ScheduleStartResolver(RecipientResolver):
     def send(self, week):
         target_date = self.current_date - datetime.timedelta(days=week * 7)
         for hour in range(24):
-            for minute in range(60):
-                target_minute = target_date + datetime.timedelta(hours=hour) + datetime.timedelta(minutes=minute)
-                # TODO: what do we do about failed tasks?
-                _schedule_minute.delay(week, target_minute)
+            target_hour = target_date + datetime.timedelta(hours=hour)
+            _schedule_hour.delay(week, target_hour)
 
 
 @task
-def _schedule_minute(week, target_time):
+def _schedule_hour(week, target_hour):
     msg_type = RecurringNudge(week)
 
-    for (user, language, context) in _schedules_for_minute(target_time):
+    for (user, language, context) in _schedules_for_hour(target_hour):
         msg = msg_type.personalize(
             Recipient(
                 user.username,
@@ -65,13 +63,13 @@ def _schedule_send(msg):
         raise
 
 
-def _schedules_for_minute(target_time):
+def _schedules_for_hour(target_hour):
     schedules = Schedule.objects.select_related(
         'enrollment__user__profile',
         'enrollment__course',
     ).filter(
-        start__gte=target_time,
-        start__lt=target_time + datetime.timedelta(seconds=60),
+        start__gte=target_hour,
+        start__lt=target_hour + datetime.timedelta(minutes=60),
     )
 
     for schedule in schedules:
