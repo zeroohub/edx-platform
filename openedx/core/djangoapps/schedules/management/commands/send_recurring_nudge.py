@@ -110,5 +110,5 @@ class Command(BaseCommand):
             tzinfo=pytz.UTC
         )
         resolver = ScheduleStartResolver(current_date)
-        for week in (1, 2, 3, 4):
+        for week in (1, 2):
             resolver.send(week)
