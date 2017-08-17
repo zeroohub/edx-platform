@@ -21,7 +21,7 @@
                 bio: null,
                 facebook_link: '',
                 twitter_link: '',
-                linkesin_link: '',
+                linkedin_link: '',
                 language_proficiencies: [],
                 requires_parental_consent: true,
                 profile_image: null,

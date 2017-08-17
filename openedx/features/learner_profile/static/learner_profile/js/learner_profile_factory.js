@@ -103,6 +103,10 @@
             });
 
             sectionOneFieldViews = [
+                new LearnerProfileFieldsView.SocialLinkIconsView({
+                    model: accountSettingsModel,
+                }),
+
                 new FieldsView.DropdownFieldView({
                     title: gettext('Location'),
                     titleVisible: true,

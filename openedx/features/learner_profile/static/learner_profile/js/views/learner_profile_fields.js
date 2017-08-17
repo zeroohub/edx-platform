@@ -3,9 +3,17 @@
     'use strict';
 
     define([
-        'gettext', 'jquery', 'underscore', 'backbone', 'edx-ui-toolkit/js/utils/string-utils',
-        'edx-ui-toolkit/js/utils/html-utils', 'js/views/fields', 'js/views/image_field', 'backbone-super'
-    ], function(gettext, $, _, Backbone, StringUtils, HtmlUtils, FieldViews, ImageFieldView) {
+        'gettext',
+        'jquery',
+        'underscore',
+        'backbone',
+        'edx-ui-toolkit/js/utils/string-utils',
+        'edx-ui-toolkit/js/utils/html-utils',
+        'js/views/fields',
+        'js/views/image_field',
+        'text!learner_profile/templates/social_icons.underscore',
+        'backbone-super'
+    ], function(gettext, $, _, Backbone, StringUtils, HtmlUtils, FieldViews, ImageFieldView, socialIconsTemplate) {
         var LearnerProfileFieldViews = {};
 
         LearnerProfileFieldViews.AccountPrivacyFieldView = FieldViews.DropdownFieldView.extend({
@@ -121,6 +129,24 @@
                 this._super(e, data);
             }
         });
+
+        LearnerProfileFieldViews.SocialLinkIconsView = Backbone.View.extend({
+
+            initialize: function(options) {
+                this.options = _.extend({}, options);
+            },
+
+            render: function() {
+                HtmlUtils.setHtml(this.$el, HtmlUtils.template(socialIconsTemplate)({
+                    social_links: {
+                        facebook: this.model.get('facebook_link'),
+                        twitter: this.model.get('twitter_link'),
+                        linkedin: this.model.get('linkedin_link')
+                    }
+                }));
+                return this;
+            }
+        })
 
         return LearnerProfileFieldViews;
     });

@@ -153,6 +153,22 @@ def update_account_settings(requesting_user, update, username=None):
             }
             del update[read_only_field]
 
+    # If the user asked to change a social link, validate and format it.
+    social_fields = ["facebook_link", "twitter_link", "linkedin_link"]
+    for link, social_field in enumerate(social_fields):
+        if social_field in update:
+            try:
+                new_social_link = update[social_field]
+                student_views.validate_social_link(social_field, new_social_link)
+
+                # Once validated, normalize the formatting
+                update[social_field] = student_views.format_social_link(social_field, new_social_link)
+            except ValueError as err:
+                field_errors[social_field] = {
+                    "developer_message": u"Error thrown from adding new social link: '{}'".format(err.message),
+                    "user_message": err.message
+                }
+
     user_serializer = AccountUserSerializer(existing_user, data=update)
     legacy_profile_serializer = AccountLegacyProfileSerializer(existing_user_profile, data=update)
 
@@ -168,19 +184,6 @@ def update_account_settings(requesting_user, update, username=None):
                 "developer_message": u"Error thrown from validate_new_email: '{}'".format(err.message),
                 "user_message": err.message
             }
-
-    # If the user asked to change a social link, validate it.
-    social_fields = ["facebook_link", "twitter_link", "linkedin_link"]
-    for link, social_field in enumerate(social_fields):
-        if social_field in update:
-            try:
-                new_social_link = update[social_field]
-                student_views.validate_social_link(social_field, new_social_link)
-            except ValueError as err:
-                field_errors[social_field] = {
-                    "developer_message": u"Error thrown from adding new social link: '{}'".format(err.message),
-                    "user_message": err.message
-                }
 
     # If we have encountered any validation errors, return them to the user.
     if field_errors:

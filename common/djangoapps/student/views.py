@@ -5,6 +5,7 @@ Student Views
 import datetime
 import json
 import logging
+import urllib
 import uuid
 import warnings
 from collections import defaultdict, namedtuple
@@ -2720,6 +2721,43 @@ def validate_social_link(social_field, new_social_link):
     if not (contains_social_url or contains_valid_username or is_empty):
         raise ValueError(_(' Make sure that you are providing a valid URL or username. To remove the field, simply' +
                            ' leave it blank.'))
+
+
+def format_social_link(social_field, new_social_link):
+    """
+    Given a valid social link for a user, return a an absolute url that can be
+    called directly from within a template. The url can take three forms
+    depending on what type of social link was provided:
+
+    1) Given a blank string, return a blank value, representing no link
+    2) Given a valid username, return 'https://www.[platform_name_base]/[username]'
+    3) Given a valid URL, return 'https://www.[URL]'
+    """
+    # Blank social links are already formatted correctly
+    if not new_social_link:
+        return new_social_link
+
+    if is_valid_username(new_social_link):
+        # Usernames are formatted according to the base string
+
+        # LinkedIn uses a different form
+        if social_field == "linkedin_link":
+            return 'https://www.{}.com/in/{}'.format(social_field.split('_')[0], new_social_link)
+        else:
+            return 'https://www.{}.com/{}'.format(social_field.split('_')[0], new_social_link)
+    else:
+        # URLs must be formatted with a 'https://www.' prefix with no hanging '/'
+
+        # Strip either the 'http://' or 'https://' prefix
+        new_social_link = new_social_link.split("//")[1] if "//" in new_social_link else new_social_link
+
+        # Strip the "www." if it exists
+        new_social_link = new_social_link.split("www.")[1] if "www." in new_social_link else new_social_link
+
+        # Assure we do not have a hanging forward slash to ensure compatibility with templating
+        new_social_link = new_social_link[:-1] if new_social_link[-1:] == '/' else new_social_link
+
+        return 'https://www.{}'.format(new_social_link)
 
 
 def is_valid_username(value):
