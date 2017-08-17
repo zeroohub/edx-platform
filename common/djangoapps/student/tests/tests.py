@@ -18,7 +18,8 @@ from django.test.client import Client
 from markupsafe import escape
 from mock import Mock, patch
 from nose.plugins.attrib import attr
-from opaque_keys.edx.locations import CourseLocator, SlashSeparatedCourseKey
+from opaque_keys.edx.keys import CourseKey
+from opaque_keys.edx.locations import CourseLocator
 from pyquery import PyQuery as pq
 
 import shoppingcart  # pylint: disable=import-error
@@ -513,6 +514,7 @@ class DashboardTest(ModuleStoreTestCase):
             expiration_datetime=datetime.now(pytz.UTC) - timedelta(days=1)
         )
 
+        self.course.certificate_available_date = datetime.now(pytz.UTC) - timedelta(days=1)
         CourseEnrollment.enroll(self.user, self.course.id, mode='honor')
 
         self.course.start = datetime.now(pytz.UTC) - timedelta(days=2)
@@ -749,10 +751,8 @@ class EnrollInCourseTest(EnrollmentEventTestMixin, CacheIsolationTestCase):
     @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
     def test_enrollment(self):
         user = User.objects.create_user("joe", "joe@joe.com", "password")
-        course_id = SlashSeparatedCourseKey("edX", "Test101", "2013")
-        # Cannot be converted to CourseLocator or CourseKey.from_string because both do not support
-        # course keys without a run. The test specifically tests functionality when run is not specified.
-        course_id_partial = SlashSeparatedCourseKey("edX", "Test101", None)
+        course_id = CourseKey.from_string("edX/Test101/2013")
+        course_id_partial = CourseKey.from_string("edX/Test101/")
 
         # Test basic enrollment
         self.assertFalse(CourseEnrollment.is_enrolled(user, course_id))
