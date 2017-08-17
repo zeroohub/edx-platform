@@ -125,6 +125,7 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
         super(AccountSettingsPageTest, self).setUp()
         self.full_name = XSS_INJECTION
         self.username, self.user_id = self.log_in_as_unique_user(full_name=self.full_name)
+        self.facebook_url = ''
         self.visit_account_settings_page()
 
     def test_page_view_event(self):
@@ -474,7 +475,7 @@ class AccountSettingsPageTest(AccountSettingsTestMixin, AcceptanceTest):
     def test_social_url_field(self):
         """
         Test behaviour of "Facebook Link" field.
-        
+
         The same behavior will apply to the "Twitter" and "LinkedIn"
         social link fields.
         """

@@ -298,6 +298,9 @@ class AccountSettingsOnCreationTest(TestCase):
             'year_of_birth': None,
             'country': None,
             'bio': None,
+            'facebook_link': None,
+            'twitter_link': None,
+            'linkedin_link': None,
             'profile_image': {
                 'has_image': False,
                 'image_url_full': request.build_absolute_uri('/static/default_50.png'),
