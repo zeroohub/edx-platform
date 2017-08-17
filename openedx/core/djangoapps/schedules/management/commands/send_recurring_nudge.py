@@ -1,19 +1,15 @@
 from __future__ import print_function
 
 import datetime
+import logging
 import pytz
 
 from celery import task
-from dateutil.tz import tzutc, gettz
 from django.core.management.base import BaseCommand
-from django.test.utils import CaptureQueriesContext
-from django.db.models import Prefetch
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from django.db import DEFAULT_DB_ALIAS, connections
 
 from openedx.core.djangoapps.schedules.models import Schedule
-from openedx.core.djangoapps.user_api.models import UserPreference
 
 from edx_ace.message import MessageType
 from edx_ace.recipient_resolver import RecipientResolver
@@ -21,14 +17,13 @@ from edx_ace import ace
 from edx_ace.recipient import Recipient
 
 
-from course_modes.models import CourseMode, format_course_price
-from lms.djangoapps.experiments.utils import check_and_get_upgrade_link
+LOG = logging.getLogger(__name__)
 
 
 class RecurringNudge(MessageType):
     def __init__(self, week, *args, **kwargs):
-        self.name = "RecurringNudge_Week{}".format(week)
         super(RecurringNudge, self).__init__(*args, **kwargs)
+        self.name = "recurringnudge_week{}".format(week)
 
 
 class ScheduleStartResolver(RecipientResolver):
@@ -36,19 +31,11 @@ class ScheduleStartResolver(RecipientResolver):
         self.current_date = current_date.replace(hour=0, minute=0, second=0)
 
     def send(self, week):
-        _schedule_day.delay(week, self.current_date - datetime.timedelta(days=week * 7))
-
-
-@task
-def _schedule_day(week, target_time):
-    for hour in range(24):
-        _schedule_hour.delay(week, target_time + datetime.timedelta(hours=hour))
-
-
-@task
-def _schedule_hour(week, target_time):
-    for minute in range(60):
-        _schedule_minute.delay(week, target_time + datetime.timedelta(minutes=minute))
+        target_date = self.current_date - datetime.timedelta(days=week * 7)
+        for hour in range(24):
+            for minute in range(60):
+                target_minute = target_date + datetime.timedelta(hours=hour) + datetime.timedelta(minutes=minute)
+                _schedule_minute.delay(week, target_minute)
 
 
 @task
@@ -69,7 +56,11 @@ def _schedule_minute(week, target_time):
 
 @task
 def _schedule_send(msg):
-    ace.send(msg)
+    try:
+        ace.send(msg)
+    except Exception as exc:
+        LOG.exception('Unable to send message')
+        raise
 
 
 def _schedules_for_minute(target_time):
