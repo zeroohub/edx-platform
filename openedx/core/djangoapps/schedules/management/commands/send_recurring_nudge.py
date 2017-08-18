@@ -59,7 +59,7 @@ def _schedule_send(msg):
     try:
         ace.send(msg)
     except Exception:
-        LOG.exception('Unable to send message %s', msg)
+        LOG.exception('Unable to queue message %s', msg)
         raise
 
 
