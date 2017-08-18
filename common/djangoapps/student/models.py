@@ -288,6 +288,8 @@ class UserProfile(models.Model):
         blank=True, null=True, max_length=6, db_index=True,
         choices=LEVEL_OF_EDUCATION_CHOICES
     )
+    profession = models.TextField(blank=True, null=True)
+    specialty = models.TextField(blank=True, null=True)
     mailing_address = models.TextField(blank=True, null=True)
     city = models.TextField(blank=True, null=True)
     country = CountryField(blank=True, null=True)

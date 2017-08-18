@@ -1782,7 +1782,7 @@ def _do_create_account(form, custom_form=None):
 
     profile_fields = [
         "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
-        "year_of_birth"
+        "year_of_birth", "profession", "specialty"
     ]
     profile = UserProfile(
         user=user,
