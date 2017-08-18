@@ -58,8 +58,8 @@ def _schedule_hour(week, target_hour):
 def _schedule_send(msg):
     try:
         ace.send(msg)
-    except Exception as exc:
-        LOG.exception('Unable to send message')
+    except Exception:
+        LOG.exception('Unable to send message %s', msg)
         raise
 
 
