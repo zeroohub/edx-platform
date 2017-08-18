@@ -9,6 +9,7 @@ from django.conf import settings
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('sites', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('schedules', '0002_auto_20170816_1532'),
     ]
@@ -23,6 +24,7 @@ class Migration(migrations.Migration):
                 ('enqueue_recurring_generic', models.BooleanField(default=False)),
                 ('deliver_recurring_generic', models.BooleanField(default=False)),
                 ('changed_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, editable=False, to=settings.AUTH_USER_MODEL, null=True, verbose_name='Changed by')),
+                ('site', models.ForeignKey(to='sites.Site')),
             ],
             options={
                 'ordering': ('-change_date',),

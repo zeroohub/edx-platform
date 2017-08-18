@@ -3,6 +3,7 @@ from collections import namedtuple
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
+from django.contrib.sites.models import Site
 
 from config_models.models import ConfigurationModel
 
@@ -30,5 +31,8 @@ class Schedule(TimeStampedModel):
 
 
 class ScheduleConfig(ConfigurationModel):
+    KEY_FIELDS = ('site')
+
+    site = models.ForeignKey(Site)
     enqueue_recurring_generic = models.BooleanField(default=False)
     deliver_recurring_generic = models.BooleanField(default=False)
