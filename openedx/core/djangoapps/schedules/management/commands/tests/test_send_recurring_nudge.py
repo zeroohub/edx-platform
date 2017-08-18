@@ -6,10 +6,11 @@ import pytz
 import ddt
 from django.conf import settings
 
-from student.tests.factories import UserFactory
+from opaque_keys.edx.keys import CourseKey
 from openedx.core.djangoapps.schedules.management.commands import send_recurring_nudge as nudge
 from openedx.core.djangolib.testing.utils import CacheIsolationTestCase
 from openedx.core.djangoapps.schedules.tests.factories import ScheduleFactory
+from student.tests.factories import UserFactory
 
 
 @ddt.ddt
@@ -61,3 +62,24 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         mock_msg = Mock()
         nudge._schedule_send(mock_msg)
         mock_ace.send.assert_called_exactly_once(mock_msg)
+
+    @patch.object(nudge, '_schedule_send')
+    def test_no_course_overview(self, mock_schedule_send):
+
+        schedule = ScheduleFactory.create(
+            start=datetime.datetime(2017, 8, 1, 20, 34, 30, tzinfo=pytz.UTC),
+        )
+        schedule.enrollment.course_id = CourseKey.from_string('edX/toy/Not_2012_Fall')
+        schedule.enrollment.save()
+
+        test_time = datetime.datetime(2017, 8, 1, 20, tzinfo=pytz.UTC)
+        with self.assertNumQueries(1):
+            nudge._schedule_hour(3, test_time)
+
+        # There is no database constraint that enforces that enrollment.course_id points
+        # to a valid CourseOverview object. However, in that case, schedules isn't going
+        # to attempt to address it, and will instead simply skip those users.
+        # This happens 'transparently' because django generates an inner-join between
+        # enrollment and course_overview, and thus will skip any rows where course_overview
+        # is null.
+        self.assertEqual(mock_schedule_send.delay.call_count, 0)
