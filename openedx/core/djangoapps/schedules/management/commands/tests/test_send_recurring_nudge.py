@@ -46,8 +46,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
     @ddt.data(1, 10, 100)
     @patch.object(nudge, 'ace')
     @patch.object(nudge, '_schedule_send')
-    def test_schedule_minute(self, schedule_count, mock_schedule_send, mock_ace):
-
+    def test_schedule_hour(self, schedule_count, mock_schedule_send, mock_ace):
         for _ in range(schedule_count):
             ScheduleFactory.create(start=datetime.datetime(2017, 8, 1, 18, 34, 30, tzinfo=pytz.UTC))
 
