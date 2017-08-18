@@ -9,7 +9,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.core.urlresolvers import reverse
 
-from openedx.core.djangoapps.schedules.models import Schedule
+from openedx.core.djangoapps.schedules.models import Schedule, ScheduleConfig
 
 from edx_ace.message import MessageType
 from edx_ace.recipient_resolver import RecipientResolver
@@ -41,6 +41,9 @@ class ScheduleStartResolver(RecipientResolver):
 def _schedule_hour(week, target_hour):
     msg_type = RecurringNudge(week)
 
+    if not ScheduleConfig.current().enqueue_recurring_nudge:
+        return
+
     for (user, language, context) in _schedules_for_hour(target_hour):
         msg = msg_type.personalize(
             Recipient(
@@ -56,6 +59,9 @@ def _schedule_hour(week, target_hour):
 
 @task(ignore_result=True, routing_key=settings.ACE_ROUTING_KEY)
 def _schedule_send(msg):
+    if not ScheduleConfig.current().current_recurring_nudge:
+        return
+
     try:
         ace.send(msg)
     except Exception:

@@ -4,6 +4,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel
 
+from config_models.models import ConfigurationModel
+
 
 class Schedule(TimeStampedModel):
     enrollment = models.OneToOneField('student.CourseEnrollment', null=False)
@@ -25,3 +27,8 @@ class Schedule(TimeStampedModel):
     class Meta(object):
         verbose_name = _('Schedule')
         verbose_name_plural = _('Schedules')
+
+
+class ScheduleConfig(ConfigurationModel):
+    enqueue_recurring_generic = models.BooleanField(default=False)
+    deliver_recurring_generic = models.BooleanField(default=False)
