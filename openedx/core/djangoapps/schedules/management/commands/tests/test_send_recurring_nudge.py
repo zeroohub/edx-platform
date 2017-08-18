@@ -29,7 +29,7 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
         nudge.Command().handle(date='2017-08-01')
         mock_resolver.assert_called_with(test_time)
 
-        for week in (1, 2, 3, 4):
+        for week in (1, 2):
             mock_resolver().send.assert_any_call(week)
 
     @patch.object(nudge, 'ace')
