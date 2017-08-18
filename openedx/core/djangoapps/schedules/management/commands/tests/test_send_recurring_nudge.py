@@ -13,7 +13,7 @@ from openedx.core.djangoapps.schedules.tests.factories import ScheduleFactory
 
 
 @ddt.ddt
-@skipUnless('schedules' in settings.INSTALLED_APPS, "Can't test schedules if the app isn't installed")
+@skipUnless('openedx.core.djangoapps.schedules.apps.SchedulesConfig' in settings.INSTALLED_APPS, "Can't test schedules if the app isn't installed")
 class TestSendRecurringNudge(CacheIsolationTestCase):
 
     # pylint: disable=protected-access
