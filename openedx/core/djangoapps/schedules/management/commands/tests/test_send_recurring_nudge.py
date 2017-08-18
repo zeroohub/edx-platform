@@ -33,34 +33,14 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
             mock_resolver().send.assert_any_call(week)
 
     @patch.object(nudge, 'ace')
-    @patch.object(nudge, '_schedule_day')
-    def test_resolver_send(self, mock_schedule_day, mock_ace):
-        test_time = datetime.datetime(2017, 8, 1, tzinfo=pytz.UTC)
-        nudge.ScheduleStartResolver(test_time).send(3)
-        self.assertFalse(mock_schedule_day.called)
-        mock_schedule_day.delay.assert_called_once_with(3, datetime.datetime(2017, 7, 11, tzinfo=pytz.UTC))
-        self.assertFalse(mock_ace.send.called)
-
-    @patch.object(nudge, 'ace')
     @patch.object(nudge, '_schedule_hour')
-    def test_schedule_day(self, mock_schedule_hour, mock_ace):
-        test_time = datetime.datetime(2017, 8, 1, tzinfo=pytz.UTC)
-        nudge._schedule_day(3, test_time)
+    def test_resolver_send(self, mock_schedule_hour, mock_ace):
+        current_time = datetime.datetime(2017, 8, 1, tzinfo=pytz.UTC)
+        nudge.ScheduleStartResolver(current_time).send(3)
+        test_time = current_time - datetime.timedelta(days=21)
         self.assertFalse(mock_schedule_hour.called)
-        self.assertEquals(mock_schedule_hour.delay.call_count, 24)
         mock_schedule_hour.delay.assert_any_call(3, test_time)
         mock_schedule_hour.delay.assert_any_call(3, test_time + datetime.timedelta(hours=23))
-        self.assertFalse(mock_ace.send.called)
-
-    @patch.object(nudge, 'ace')
-    @patch.object(nudge, '_schedule_minute')
-    def test_schedule_hour(self, mock_schedule_minute, mock_ace):
-        test_time = datetime.datetime(2017, 8, 1, 15, tzinfo=pytz.UTC)
-        nudge._schedule_hour(3, test_time)
-        self.assertFalse(mock_schedule_minute.called)
-        self.assertEquals(mock_schedule_minute.delay.call_count, 60)
-        mock_schedule_minute.delay.assert_any_call(3, test_time)
-        mock_schedule_minute.delay.assert_any_call(3, test_time + datetime.timedelta(minutes=59))
         self.assertFalse(mock_ace.send.called)
 
     @ddt.data(1, 10, 100)
@@ -69,11 +49,11 @@ class TestSendRecurringNudge(CacheIsolationTestCase):
     def test_schedule_minute(self, schedule_count, mock_schedule_send, mock_ace):
 
         for _ in range(schedule_count):
-            ScheduleFactory.create(start=datetime.datetime(2017, 8, 1, 15, 34, 30, tzinfo=pytz.UTC))
+            ScheduleFactory.create(start=datetime.datetime(2017, 8, 1, 18, 34, 30, tzinfo=pytz.UTC))
 
-        test_time = datetime.datetime(2017, 8, 1, 15, 34, tzinfo=pytz.UTC)
+        test_time = datetime.datetime(2017, 8, 1, 18, tzinfo=pytz.UTC)
         with self.assertNumQueries(1):
-            nudge._schedule_minute(3, test_time)
+            nudge._schedule_hour(3, test_time)
         self.assertEqual(mock_schedule_send.delay.call_count, schedule_count)
         self.assertFalse(mock_ace.send.called)
 
