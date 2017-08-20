@@ -58,7 +58,7 @@ describe('Calculator', function() {
 
         self.calculator.toggle(jQuery.Event("click"));
 
-      	deferred.promise();
+      	return deferred.promise();
       };
 
       focus().then(

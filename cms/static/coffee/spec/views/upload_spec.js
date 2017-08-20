@@ -45,6 +45,7 @@ define(["sinon", "js/models/uploads", "js/views/uploads", "js/models/chapter",
                     }
                 });
                 this.lastView = view;
+                return view;
             };
 
             describe("Basic", function() {

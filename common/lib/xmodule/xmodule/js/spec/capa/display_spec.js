@@ -30,7 +30,7 @@ describe('Problem', function() {
     spyOn(Logger, 'log');
     spyOn($.fn, 'load').and.callFake(function(url, callback) {
       $(this).html(readFixtures('problem_content.html'));
-      callback();
+      return callback();
     });
   });
 
@@ -272,6 +272,7 @@ data-url='/problem/quiz/'> \
           always(callable) { return callable(); },
           done(callable) { return callable(); }
         };
+        return promise;
       });
       this.problem.submit();
       expect(Logger.log).toHaveBeenCalledWith('problem_check', 'foo=1&bar=2');
@@ -289,6 +290,7 @@ data-url='/problem/quiz/'> \
           always(callable) { return callable(); },
           done(callable) { return callable(); }
         };
+        return promise;
       });
       this.problem.submit();
       expect(Logger.log).toHaveBeenCalledWith('problem_graded', ['foo=1&bar=2', 'mock grader response'], this.problem.id);
@@ -301,6 +303,7 @@ data-url='/problem/quiz/'> \
           always(callable) { return callable(); },
           done(callable) { return callable(); }
         };
+        return promise;
       });
       this.problem.submit();
       expect($.postWithPrefix).toHaveBeenCalledWith('/problem/Problem1/problem_check',
@@ -318,6 +321,7 @@ data-url='/problem/quiz/'> \
             always(callable) { return callable(); },
             done(callable) { return callable(); }
           };
+          return promise;
         });
         this.problem.submit();
         expect(this.problem.el).toHaveHtml(contents);
@@ -335,6 +339,7 @@ data-url='/problem/quiz/'> \
             always(callable) { return callable(); },
             done(callable) { return callable(); }
           };
+          return promise;
         });
         this.problem.submit();
         expect(this.problem.el).toHaveHtml(contents);
@@ -358,6 +363,7 @@ data-url='/problem/quiz/'> \
           always(callable) { return callable(); },
           done(callable) { return callable(); }
         };
+        return promise;
       });
       // Make sure the submit button is enabled before submitting
       $('#input_example_1').val('test').trigger('input');
@@ -467,6 +473,7 @@ data-url='/problem/quiz/'> \
         let promise;
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.answers = 'foo=1&bar=2';
       this.problem.reset();
@@ -478,6 +485,7 @@ data-url='/problem/quiz/'> \
         let promise;
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.reset();
       expect($.postWithPrefix).toHaveBeenCalledWith('/problem/Problem1/problem_reset',
@@ -490,6 +498,7 @@ data-url='/problem/quiz/'> \
         callback({html: "Reset", success: true});
         promise =
             {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.reset();
       expect(this.problem.el.html()).toEqual('Reset');
@@ -501,6 +510,7 @@ data-url='/problem/quiz/'> \
         callback({html: "Reset", success: true});
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.reset();
       expect(window.SR.readText).toHaveBeenCalledWith('This problem has been reset.');
@@ -512,6 +522,7 @@ data-url='/problem/quiz/'> \
         callback({msg: "Error on reset.", success: false});
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.reset();
       expect($('.notification-gentle-alert .notification-message').text()).toEqual("Error on reset.");
@@ -528,6 +539,7 @@ data-url='/problem/quiz/'> \
         callback({success: 'correct', html: curr_html});
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       // Submit should be disabled
       expect(this.problem.submitButton).toHaveAttr('disabled');
@@ -810,6 +822,7 @@ data-url='/problem/quiz/'> \
         let promise;
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.save();
       expect(Logger.log).toHaveBeenCalledWith('problem_save', 'foo=1&bar=2');
@@ -820,6 +833,7 @@ data-url='/problem/quiz/'> \
         let promise;
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       this.problem.save();
       expect($.postWithPrefix).toHaveBeenCalledWith('/problem/Problem1/problem_save',
@@ -837,6 +851,7 @@ data-url='/problem/quiz/'> \
         callback({success: 'correct', html: curr_html});
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       // Expect submit to be disabled and labeled properly at the start
       expect(this.problem.submitButton).toHaveAttr('disabled');
@@ -858,6 +873,7 @@ data-url='/problem/quiz/'> \
         callback({success: 'correct', html: curr_html});
         promise =
           {always(callable) { return callable(); }};
+        return promise;
       });
       // Expect submit to be enabled and labeled properly at the start after adding an input
       $('#input_example_1').val('test').trigger('input');
