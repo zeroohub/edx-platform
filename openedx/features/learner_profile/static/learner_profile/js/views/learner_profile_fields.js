@@ -137,13 +137,18 @@
             },
 
             render: function() {
-                HtmlUtils.setHtml(this.$el, HtmlUtils.template(socialIconsTemplate)({
-                    social_links: {
-                        social_links: this.model.get('social_links'),
-                        facebook: this.model.get('facebook_link'),
-                        twitter: this.model.get('twitter_link'),
-                        linkedin: this.model.get('linkedin_link')
+                var social_links = {}
+                for (var platform_name in this.options.social_platforms) {
+                    social_links[platform_name] = null;
+                    for (var link in this.model.get('social_links')) {
+                        if (platform_name == this.model.get('social_links')[link]['platform']) {
+                            social_links[platform_name] = this.model.get('social_links')[link]['social_link'];
+                        }
                     }
+                }
+
+                HtmlUtils.setHtml(this.$el, HtmlUtils.template(socialIconsTemplate)({
+                    social_links: social_links
                 }));
                 return this;
             }

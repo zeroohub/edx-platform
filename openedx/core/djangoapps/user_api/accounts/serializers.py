@@ -298,7 +298,8 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
             ])
 
         # Update the user's social links
-        new_social_link = self._kwargs['data']['social_links'][0]
+        social_link_data = self._kwargs['data']['social_links']
+        new_social_link = social_link_data[0] if len(social_link_data) > 0 else ''
         if new_social_link:
             current_social_links = list(instance.social_links.all())
             instance.social_links.all().delete()

@@ -229,6 +229,10 @@
 
         .social-links {
             font-size: 2rem;
+
+            & > span {
+                color: $gray-l4;
+            }
         }
 
         .u-field {
