@@ -102,7 +102,7 @@ def _update_certificate_context(context, user_certificate, platform_name):
     course = get_course_by_id(user_certificate.course_id)
     date = course.certificate_available_date if not course.self_paced else user_certificate.modified_date
     context['certificate_date_issued'] = _('{month} {day}, {year}').format(
-        month=strftime_localized(user_certificate.modified_date, "%B"),
+        month=strftime_localized(date, "%B"),
         day=date.day,
         year=date.year
     )
