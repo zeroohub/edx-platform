@@ -3,6 +3,7 @@ from __future__ import print_function
 import datetime
 import logging
 import pytz
+from django.contrib.sites.models import Site
 
 from celery import task
 from django.core.management.base import BaseCommand
@@ -27,22 +28,23 @@ class RecurringNudge(MessageType):
 
 
 class ScheduleStartResolver(RecipientResolver):
-    def __init__(self, current_date):
+    def __init__(self, site, current_date):
+        self.site = site
         self.current_date = current_date.replace(hour=0, minute=0, second=0)
 
     def send(self, week):
+        if not ScheduleConfig.current(self.site).enqueue_recurring_generic:
+            return
+
         target_date = self.current_date - datetime.timedelta(days=week * 7)
         for hour in range(24):
             target_hour = target_date + datetime.timedelta(hours=hour)
-            _schedule_hour.delay(week, target_hour)
+            _schedule_hour.apply_async((self.site.id, week, target_hour), retry=False)
 
 
 @task(ignore_result=True, routing_key=settings.ACE_ROUTING_KEY)
-def _schedule_hour(week, target_hour):
+def _schedule_hour(site_id, week, target_hour):
     msg_type = RecurringNudge(week)
-
-    if not ScheduleConfig.current().enqueue_recurring_nudge:
-        return
 
     for (user, language, context) in _schedules_for_hour(target_hour):
         msg = msg_type.personalize(
@@ -53,20 +55,16 @@ def _schedule_hour(week, target_hour):
             language,
             context,
         )
-        # TODO: what do we do about failed send tasks?
-        _schedule_send.delay(msg)
+        _schedule_send.apply_async((site_id, msg), retry=False)
 
 
 @task(ignore_result=True, routing_key=settings.ACE_ROUTING_KEY)
-def _schedule_send(msg):
-    if not ScheduleConfig.current().current_recurring_nudge:
+def _schedule_send(site_id, msg):
+    site = Site.objects.get(pk=site_id)
+    if not ScheduleConfig.current(site).deliver_recurring_generic:
         return
 
-    try:
-        ace.send(msg)
-    except Exception:
-        LOG.exception('Unable to queue message %s', msg)
-        raise
+    ace.send(msg)
 
 
 def _schedules_for_hour(target_hour):
@@ -110,12 +108,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--date', default=datetime.datetime.utcnow().date().isoformat())
+        parser.add_argument('site_domain_name')
 
     def handle(self, *args, **options):
         current_date = datetime.datetime(
             *[int(x) for x in options['date'].split('-')],
             tzinfo=pytz.UTC
         )
-        resolver = ScheduleStartResolver(current_date)
+        site = Site.objects.get(domain__iexact=options['site_domain_name'])
+        resolver = ScheduleStartResolver(site, current_date)
         for week in (1, 2):
             resolver.send(week)

@@ -31,7 +31,7 @@ class Schedule(TimeStampedModel):
 
 
 class ScheduleConfig(ConfigurationModel):
-    KEY_FIELDS = ('site')
+    KEY_FIELDS = ('site',)
 
     site = models.ForeignKey(Site)
     enqueue_recurring_generic = models.BooleanField(default=False)
