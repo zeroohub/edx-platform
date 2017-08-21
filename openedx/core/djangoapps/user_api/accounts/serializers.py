@@ -112,9 +112,6 @@ class UserReadOnlySerializer(serializers.Serializer):
             "accomplishments_shared": accomplishments_shared,
             "account_privacy": self.configuration.get('default_visibility'),
             "social_links": None,
-            "facebook_link": None,
-            "twitter_link": None,
-            "linkedin_link": None
         }
 
         if user_profile:
@@ -141,9 +138,6 @@ class UserReadOnlySerializer(serializers.Serializer):
                     "social_links": SocialLinkSerializer(
                         user_profile.social_links.all(), many=True
                     ).data,
-                    "facebook_link": user_profile.facebook_link,
-                    "twitter_link": user_profile.twitter_link,
-                    "linkedin_link": user_profile.linkedin_link
                 }
             )
 
@@ -194,8 +188,8 @@ class AccountLegacyProfileSerializer(serializers.HyperlinkedModelSerializer, Rea
     class Meta(object):
         model = UserProfile
         fields = (
-            "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "social_links", "facebook_link", "twitter_link",
-            "linkedin_link", "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies"
+            "name", "gender", "goals", "year_of_birth", "level_of_education", "country", "social_links",
+            "mailing_address", "bio", "profile_image", "requires_parental_consent", "language_proficiencies"
         )
         # Currently no read-only field, but keep this so view code doesn't need to know.
         read_only_fields = ()

@@ -49,32 +49,6 @@ define(['backbone',
                                 })
                             }
                         ]
-                    },
-                    {
-                        title: 'Social Links',
-                        fields: [
-                            {
-                                view: new FieldViews.TextFieldView({
-                                    model: model,
-                                    title: 'Facebook Link',
-                                    valueAttribute: 'facebook_link'
-                                })
-                            },
-                            {
-                                view: new FieldViews.TextFieldView({
-                                    model: model,
-                                    title: 'Twitter Link',
-                                    valueAttribute: 'twitter_link'
-                                })
-                            },
-                            {
-                                view: new FieldViews.TextFieldView({
-                                    model: model,
-                                    title: 'LinkedIn Link',
-                                    valueAttribute: 'linkedin_link'
-                                })
-                            }
-                        ]
                     }
                 ];
 
