@@ -139,6 +139,7 @@
             render: function() {
                 HtmlUtils.setHtml(this.$el, HtmlUtils.template(socialIconsTemplate)({
                     social_links: {
+                        social_links: this.model.get('social_links'),
                         facebook: this.model.get('facebook_link'),
                         twitter: this.model.get('twitter_link'),
                         linkedin: this.model.get('linkedin_link')

@@ -2935,6 +2935,7 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
         'time_zone',
         'language_proficiencies',
         'bio',
+        'social_links',
         'facebook_link',
         'twitter_link',
         'linkedin_link',
@@ -2960,6 +2961,7 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
         "country",
         "profile_image",
         "language_proficiencies",
+        "social_links",
         'facebook_link',
         'twitter_link',
         'linkedin_link',
@@ -2973,6 +2975,27 @@ ACCOUNT_VISIBILITY_CONFIGURATION = {
         "account_privacy",
         "accomplishments_shared",
     ]
+}
+
+# The current list of social platforms to be shown to the user
+# tied to the stub in the format [stub][username] that links
+# directly to the user's social profile.
+SOCIAL_PLATFORMS = {
+    'facebook': {
+        'display_name': 'Facebook',
+        'url_stub': 'facebook.com/',
+        'example': 'https://www.facebook.com/edX'
+    },
+    'twitter': {
+        'display_name': 'Twitter',
+        'url_stub': 'twitter.com/',
+        'example': 'https://www.twitter.com/edXOnline'
+    },
+    'linkedin': {
+        'display_name': 'LinkedIn',
+        'url_stub': 'linkedin.com/in/',
+        'example': 'www.linkedin.com/in/agarwaledu/'
+    }
 }
 
 # E-Commerce API Configuration

@@ -2701,15 +2701,15 @@ def validate_new_email(user, new_email):
 
 def validate_social_link(social_field, new_social_link):
     """
-    Given a new social link for a user. The social link can take three forms:
+    Given a new social link for a user, assure that the link. The social link can take three forms:
 
     1) A valid url that comes from the correct social site
     2) A valid username
     3) A blank value
     """
-    # Check if the link contains a valid url
-    required_website = '{}.com/'.format(social_field.split('_')[0])
-    contains_social_url = required_website in new_social_link
+    # Check if the link contains a valid url to the core domain
+    required_url_stub = settings.SOCIAL_PLATFORMS[social_field]['url_stub']
+    contains_social_url = required_url_stub in new_social_link
 
     # Check if the link contains a valid username
     contains_valid_username = is_valid_username(new_social_link)
@@ -2719,8 +2719,8 @@ def validate_social_link(social_field, new_social_link):
 
     # Assure that the new link has the either correct website url, a valid username or is empty
     if not (contains_social_url or contains_valid_username or is_empty):
-        raise ValueError(_(' Make sure that you are providing a valid URL or username. To remove the field, simply' +
-                           ' leave it blank.'))
+        raise ValueError(_(' Make sure that you are providing a valid username or URL containing "' +
+                            required_url_stub + '". To remove the field, simply leave it blank.'))
 
 
 def format_social_link(social_field, new_social_link):
@@ -2738,13 +2738,8 @@ def format_social_link(social_field, new_social_link):
         return new_social_link
 
     if is_valid_username(new_social_link):
-        # Usernames are formatted according to the base string
-
-        # LinkedIn uses a different form
-        if social_field == "linkedin_link":
-            return 'https://www.{}.com/in/{}'.format(social_field.split('_')[0], new_social_link)
-        else:
-            return 'https://www.{}.com/{}'.format(social_field.split('_')[0], new_social_link)
+        # Usernames are formatted according to the base url string
+        return 'https://www.{}{}'.format(settings.SOCIAL_PLATFORMS[social_field]['url_stub'], new_social_link)
     else:
         # URLs must be formatted with a 'https://www.' prefix with no hanging '/'
 

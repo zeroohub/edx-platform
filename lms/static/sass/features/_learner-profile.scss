@@ -227,15 +227,15 @@
     .profile-section-one-fields {
         @include margin(0, $baseline/2, 0, $baseline*0.75);
 
+        .social-links {
+            font-size: 2rem;
+        }
+
         .u-field {
             @extend %t-weight4;
             padding: 0;
             color: $base-font-color;
             margin-top: $baseline/5;
-
-            &.social-links {
-                font-size: 2rem;
-            }
 
             .u-field-value, .u-field-title {
                 @extend %t-weight4;

@@ -1,4 +1,4 @@
-<div class="u-field-value field">
+<div class="u-field-value field" <% if (dataStore) { %> data-<%-Object.keys(dataStore)[0] %>=<%-dataStore[Object.keys(dataStore)[0]] %> <% } %> >
     <label class="u-field-title field-label" for="field-input-<%- id %>"><%- title %></label>
     <input class="field-input input-text" placeholder="<%- placeholder %>" type="text" id="field-input-<%- id %>" title="Input field for <%- id %>" aria-describedby="u-field-message-help-<%- id %>" name="input" value="<%- value %>" />
 </div>

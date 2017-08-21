@@ -224,6 +224,29 @@
                     }
                 }
             }),
+
+            SocialLinkTextFieldView: FieldViews.TextFieldView.extend({
+                fieldTemplate: field_text_account_template,
+
+                modelValue: function() {
+                    var socialLinks = this.model.get('social_links');
+                    for (var i=0; i < socialLinks.length; i++) {
+                        if (socialLinks[i].platform == this.options.dataStore.platform) {
+                            return socialLinks[i].social_link;
+                        }
+                    }
+                    return null;
+                },
+                saveValue: function() {
+                    if (this.persistChanges === true) {
+                        var attributes = {},
+                            value = this.fieldValue() ? [{platform: $(this.el).find('.u-field-value').data('platform'),
+                                social_link: this.fieldValue()}] : [];
+                        attributes[this.options.valueAttribute] = value;
+                        this.saveAttributes(attributes);
+                    }
+                }
+            }),
             AuthFieldView: FieldViews.LinkFieldView.extend({
                 fieldTemplate: field_social_link_template,
                 className: function() {

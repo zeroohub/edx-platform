@@ -22,6 +22,7 @@
                 facebook_link: '',
                 twitter_link: '',
                 linkedin_link: '',
+                social_links: [],
                 language_proficiencies: [],
                 requires_parental_consent: true,
                 profile_image: null,

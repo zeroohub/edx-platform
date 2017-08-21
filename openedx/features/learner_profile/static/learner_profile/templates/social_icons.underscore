@@ -1,7 +1,7 @@
 <div class="social-links">
     <% for (var platform in social_links) { %>
         <% if (social_links[platform]) { %> <a href= <%-social_links[platform]%>><% } %>
-            <span class="icon fa fa-<%-platform%>-square" aria-hidden="true"></span>
+            <span class="icon fa fa-<%-platform%>-square" data-platform=<%-platform%> aria-hidden="true"></span>
         <% if (social_links[platform]) { %> </a> <% } %>
     <% } %>
 </div>

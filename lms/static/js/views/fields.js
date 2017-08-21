@@ -335,6 +335,7 @@
                     title: this.options.title,
                     value: this.modelValue(),
                     message: this.helpMessage,
+                    dataStore: this.options.dataStore,
                     placeholder: this.options.placeholder || '',
                 }));
                 this.delegateEvents();

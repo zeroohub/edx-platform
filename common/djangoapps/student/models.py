@@ -2366,6 +2366,15 @@ class LanguageProficiency(models.Model):
     )
 
 
+class SocialLink(models.Model):
+    """
+    Represents a single social link for a particular user.
+    """
+    user_profile = models.ForeignKey(UserProfile, db_index=True, related_name='social_links')
+    platform = models.CharField(max_length=30)
+    social_link = models.CharField(max_length=100, blank=True)
+
+
 class CourseEnrollmentAttribute(models.Model):
     """
     Provide additional information about the user's enrollment.

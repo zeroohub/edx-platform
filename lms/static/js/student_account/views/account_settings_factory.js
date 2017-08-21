@@ -19,7 +19,8 @@
             accountUserId,
             platformName,
             contactEmail,
-            allowEmailChange
+            allowEmailChange,
+            socialPlatforms
         ) {
             var accountSettingsElement, userAccountModel, userPreferencesModel, aboutSectionsData,
                 accountsSectionData, ordersSectionData, accountSettingsView, showAccountSettingsPage,
@@ -236,6 +237,34 @@
                     ]
                 }
             ];
+
+            // Add the social link fields
+            var socialFields = {
+                title: gettext('More Social Links'),
+                fields: []
+            }
+
+            for (var social_platform in socialPlatforms) {
+                var platformData = socialPlatforms[social_platform];
+                socialFields.fields.push(
+                    {
+                        view: new AccountSettingsFieldViews.SocialLinkTextFieldView({
+                            model: userAccountModel,
+                            title: gettext(platformData['display_name'] + ' Link'),
+                            valueAttribute: 'social_links',
+                            helpMessage: gettext(
+                                'Optionally, link to your ' + platformData['display_name'] +
+                                ' profile from your edX learner profile by adding the URL to ' +
+                                'your personal page or your username.'
+                            ),
+                            dataStore: {'platform': social_platform},
+                            persistChanges: true,
+                            placeholder: gettext('ex: ' + platformData['example'])
+                        }),
+                    }
+                );
+            }
+            aboutSectionsData.push(socialFields);
 
             // set TimeZoneField to listen to CountryField
             getUserField = function(list, search) {
