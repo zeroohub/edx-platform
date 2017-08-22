@@ -33,7 +33,7 @@ class ScheduleStartResolver(RecipientResolver):
         self.current_date = current_date.replace(hour=0, minute=0, second=0)
 
     def send(self, week):
-        if not ScheduleConfig.current(self.site).enqueue_recurring_generic:
+        if not ScheduleConfig.current(self.site).enqueue_recurring_nudge:
             return
 
         target_date = self.current_date - datetime.timedelta(days=week * 7)
@@ -61,7 +61,7 @@ def _schedule_hour(site_id, week, target_hour):
 @task(ignore_result=True, routing_key=settings.ACE_ROUTING_KEY)
 def _schedule_send(site_id, msg):
     site = Site.objects.get(pk=site_id)
-    if not ScheduleConfig.current(site).deliver_recurring_generic:
+    if not ScheduleConfig.current(site).deliver_recurring_nudge:
         return
 
     ace.send(msg)
